@@ -657,6 +657,21 @@ def command_check(args):
                     problems.append(f"plugin with skills: {plugin_id} (bring its skills in with `add`, then uninstall it)")
                     break
 
+    if args.hook:
+        # For a Claude Code SessionStart hook: say nothing when all is well; otherwise
+        # warn the user and tell Claude, and never fail, so a session always starts.
+        if problems:
+            report = "mskills check: skills that did not come through mskills:\n" + "\n".join(
+                f"- {problem}" for problem in problems)
+            print(json.dumps({
+                "systemMessage": report,
+                "hookSpecificOutput": {
+                    "hookEventName": "SessionStart",
+                    "additionalContext": report + "\nTell the user about these at the start of your first reply.",
+                },
+            }))
+        return
+
     if problems:
         print("mskills check found skills that did not come through mskills:")
         for problem in problems:
@@ -702,6 +717,8 @@ def main():
 
     check = commands.add_parser("check", help="report skills that did not come through mskills")
     check.add_argument("--quiet", action="store_true", help="print nothing when all is well")
+    check.add_argument("--hook", action="store_true",
+                       help="output for a Claude Code SessionStart hook: JSON when something is wrong, always exit 0")
     check.set_defaults(handler=command_check)
 
     args = parser.parse_args()

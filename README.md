@@ -75,6 +75,7 @@ If I changed a tracked skill in the repo, `update` skips it and says so. Then ei
 ## Rules
 
 - Install skills only with `./mskills add`. Not with plugin installs or other skill installers. `./mskills check` catches anything that got in another way.
+- `./mskills check --hook` runs at the start of every Claude Code session, from a SessionStart hook in `~/.claude/settings.json`. It says nothing when all is well. Otherwise it shows a warning and tells Claude what is wrong. It never stops a session from starting.
 - Skills that belong to one project go in that project's `.claude/skills`, not here.
 - Built-in Anthropic and Claude Code skills are not managed here.
 
