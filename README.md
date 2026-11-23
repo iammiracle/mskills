@@ -96,6 +96,7 @@ Licenses of the repos that tracked skills come from are in `licenses/`. Some ski
 
 - Matt Pocock's skills: MIT
 - Cloudflare skills: Apache 2.0
+- vinext (migrate-to-vinext): MIT
 - HyperFrames: Apache 2.0
 - shadcn: MIT
 - seo-skills (Ilias Ism): MIT, stated in its README; it has no license file

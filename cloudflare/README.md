@@ -2,7 +2,7 @@
 
 <!-- Written by ./mskills from sources.json. Edit summaries there, then run ./mskills readme. -->
 
-10 skills.
+11 skills.
 
 ## agents-sdk
 
@@ -35,6 +35,14 @@ Build stateful features such as chat rooms, bookings and games with Durable Obje
 - Kind: tracked, from [cloudflare/skills/skills/durable-objects](https://github.com/cloudflare/skills/tree/HEAD/skills/durable-objects)
 - Last approved: 2026-11-23
 - Instructions: [durable-objects/SKILL.md](durable-objects/SKILL.md)
+
+## migrate-to-vinext
+
+Move a Next.js project to vinext, Cloudflare's Vite-based version of Next.js.
+
+- Kind: tracked, from [cloudflare/vinext/.agents/skills/migrate-to-vinext](https://github.com/cloudflare/vinext/tree/HEAD/.agents/skills/migrate-to-vinext)
+- Last approved: 2026-11-23
+- Instructions: [migrate-to-vinext/SKILL.md](migrate-to-vinext/SKILL.md)
 
 ## nextjs-on-cloudflare
 

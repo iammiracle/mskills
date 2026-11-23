@@ -321,6 +321,19 @@
     "updated": "2026-11-23",
     "summary": "Move React and shadcn projects from Radix UI to Base UI."
   },
+  "migrate-to-vinext": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/vinext",
+      "path": ".agents/skills/migrate-to-vinext",
+      "ref": "HEAD"
+    },
+    "version": "0916a6edf5682ebd320fd819912a5aabec50656f",
+    "hash": "sha256:c1288128cda45d69576da0b5a2c5a51ee348a889a0fa9375d0100d7ddfbf53f2",
+    "updated": "2026-11-23",
+    "summary": "Move a Next.js project to vinext, Cloudflare's Vite-based version of Next.js."
+  },
   "nextjs-on-cloudflare": {
     "status": "tracked",
     "source": {
