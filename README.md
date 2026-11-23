@@ -67,6 +67,8 @@ If I changed a tracked skill in the repo, `update` skips it and says so. Then ei
 | [planning/](planning/README.md) | stress-testing plans, research, handoffs |
 | [writing/](writing/README.md) | plain English, skill writing, pull requests |
 | [content/](content/README.md) | reels, scripts, video, social data, images |
+| [seo/](seo/README.md) | site audits, titles, internal links, comparison pages, launches |
+| [marketing/](marketing/README.md) | customer research, copy, launch posts from commits |
 
 `add` and `move` make a new area folder when one is needed. Skill names must be unique across all areas, because Claude Code sees one flat list. `add` refuses names of built-in Claude Code skills such as `code-review`, because mine would hide the built-in one.
 
@@ -96,5 +98,6 @@ Licenses of the repos that tracked skills come from are in `licenses/`. Some ski
 - Cloudflare skills: Apache 2.0
 - HyperFrames: Apache 2.0
 - shadcn: MIT
+- seo-skills (Ilias Ism): MIT, stated in its README; it has no license file
 - SimpleEnglish: MIT
 - frontend-design and the uizze skills: license file inside the skill folder

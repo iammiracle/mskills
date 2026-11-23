@@ -1,0 +1,4 @@
+Illyism/seo-skills (https://github.com/Illyism/seo-skills), maintained by Ilias Ism.
+
+The repo has no LICENSE file. Its README and .claude-plugin/plugin.json state
+that it is MIT-licensed. Checked on 2026-11-23 at commit a158c36.

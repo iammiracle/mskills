@@ -16,6 +16,32 @@
     "status": "owned",
     "summary": "Make anatomy app TikToks: a 3D bone or organ with a quiz caption."
   },
+  "blitz-copy": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "copywriting/blitz-copy",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:431f20b9eaae6b25085a3b2ad87842961de373cfe9db2ed617769c41423d6860",
+    "updated": "2026-11-23",
+    "summary": "Write landing pages, headlines and cold emails."
+  },
+  "blog-refresher": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/blog-refresher",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:e3a0465f5ca01ae5cc62c6e148d43c3f2cc31464715317bf1c3547ab2bc318b1",
+    "updated": "2026-11-23",
+    "summary": "Update old blog posts so they can outrank competitors."
+  },
   "cloudflare": {
     "status": "tracked",
     "source": {
@@ -67,6 +93,45 @@
     "hash": "sha256:f2a53ee3bdbbc422ed6c630036b1c7788d39998f44e36f1523e409a60e356fb9",
     "updated": "2026-11-23",
     "summary": "A step-by-step loop for hard bugs and slow code."
+  },
+  "diff-marketing": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "marketing/diff-marketing",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:e4b427862821ee30d2bac332541b284ab896b4c99a8b054076554240f00ed0ac",
+    "updated": "2026-11-23",
+    "summary": "Turn recent commits and merged PRs into changelog entries and launch posts."
+  },
+  "directory-submissions": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/directory-submissions",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:702eb5143d0b0d659741a4890f06bd0b10029afb9bb8564fb066926b6cf6c1aa",
+    "updated": "2026-11-23",
+    "summary": "Submit a new product to launch sites, directories and registries."
+  },
+  "domain-migration": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/domain-migration",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:21298b995688a22e6fca6593c1bf2f0d0d4e6708fc2fee65678c70171e7f39de",
+    "updated": "2026-11-23",
+    "summary": "Change a domain or move a blog without losing rankings, with a redirect checker."
   },
   "domain-modeling": {
     "status": "tracked",
@@ -197,6 +262,19 @@
     "updated": "2026-11-23",
     "summary": "About 450 ready-made HyperFrames blocks: transitions, titles, captions, charts and more."
   },
+  "internal-linking": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/internal-linking",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:850a52ec61478fb5ea0609b1010e7970c23386d5783208bbf3351c5dc208a9b8",
+    "updated": "2026-11-23",
+    "summary": "Add links from busy informational posts to the pages that make money."
+  },
   "ios-design": {
     "status": "tracked",
     "source": {
@@ -315,6 +393,32 @@
     "note": "no longer upstream; replaced there by sandbox-stable and sandbox-next",
     "summary": "Run untrusted code in Cloudflare sandboxes. Cloudflare has replaced it upstream with sandbox-stable and sandbox-next."
   },
+  "seo-roast": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/seo-roast",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:d92b0d9356bb38c737d50e14a64c5343d9babc6c8d7c2527b90605470b2b3f7b",
+    "updated": "2026-11-23",
+    "summary": "Audit a site and its code for SEO problems, and fix the worst ones in a PR."
+  },
+  "seo-title-optimization": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/seo-title-optimization",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:141c9e1940bbd9b12409ce6bd0df16f6b475d34f6f578a5d02a6871db0c6d1ae",
+    "updated": "2026-11-23",
+    "summary": "Rewrite page titles and H1s, checked against Google results and length limits."
+  },
   "shadcn": {
     "status": "tracked",
     "source": {
@@ -390,9 +494,35 @@
     "updated": "2026-11-23",
     "summary": "Design, build and review web and iOS UI that does not look generic."
   },
+  "understand-customers": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "copywriting/understand-customers",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:b4ad5300e744688e52b13b809fcf809c61ed83ade887d743fb67a55945e435e2",
+    "updated": "2026-11-23",
+    "summary": "Research what buyers want, fear and say before writing copy."
+  },
   "viral-video-writing": {
     "status": "owned",
     "summary": "Write video scripts and hooks that people watch to the end."
+  },
+  "vs-and-alternatives": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "Illyism/seo-skills",
+      "path": "seo/vs-and-alternatives",
+      "ref": "HEAD"
+    },
+    "version": "a158c36a1c2c84a44ee7a1ae69c009caf73e1a35",
+    "hash": "sha256:5e24ffab29859982500f6196d7d36dbb81e4097722cac0588cc8b534a1e135cd",
+    "updated": "2026-11-23",
+    "summary": "Build 'X vs Y' and 'alternatives to X' comparison pages."
   },
   "web-perf": {
     "status": "tracked",
