@@ -1,0 +1,9 @@
+{
+ "page": "ipad.html",
+ "screen": "forearm-screen.resolved.json",
+ "duration": 10,
+ "camY": 300,
+ "camZ": 150,
+ "fov": 49,
+ "lookZ": 0
+}

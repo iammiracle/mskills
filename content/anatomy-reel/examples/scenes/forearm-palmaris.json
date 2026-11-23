@@ -1,0 +1,98 @@
+{
+ "duration": 10,
+ "parts": [
+  {
+   "match": "^right palmaris longus$",
+   "id": "palmaris",
+   "look": "muscle"
+  },
+  {
+   "match": "^(distal\\ phalanx\\ of\\ right\\ index\\ finger|distal\\ phalanx\\ of\\ right\\ little\\ finger|distal\\ phalanx\\ of\\ right\\ middle\\ finger|distal\\ phalanx\\ of\\ right\\ ring\\ finger|distal\\ phalanx\\ of\\ right\\ thumb|flexor\\ retinaculum\\ of\\ right\\ wrist|humeral\\ head\\ of\\ right\\ extensor\\ carpi\\ ulnaris|humeral\\ head\\ of\\ right\\ flexor\\ carpi\\ ulnaris|humeral\\ head\\ of\\ right\\ pronator\\ teres|humeroulnar\\ head\\ of\\ right\\ flexor\\ digitorum\\ superficialis|interosseous\\ membrane\\ of\\ right\\ forearm|lateral\\ head\\ of\\ right\\ triceps\\ brachii|long\\ head\\ of\\ right\\ biceps\\ brachii|long\\ head\\ of\\ right\\ triceps\\ brachii|medial\\ head\\ of\\ right\\ triceps\\ brachii|middle\\ phalanx\\ of\\ right\\ index\\ finger|middle\\ phalanx\\ of\\ right\\ little\\ finger|middle\\ phalanx\\ of\\ right\\ middle\\ finger|middle\\ phalanx\\ of\\ right\\ ring\\ finger|proximal\\ phalanx\\ of\\ right\\ index\\ finger|proximal\\ phalanx\\ of\\ right\\ little\\ finger|proximal\\ phalanx\\ of\\ right\\ middle\\ finger|proximal\\ phalanx\\ of\\ right\\ ring\\ finger|proximal\\ phalanx\\ of\\ right\\ thumb|radial\\ head\\ of\\ right\\ flexor\\ digitorum\\ superficialis|right\\ abductor\\ pollicis\\ longus|right\\ anconeus|right\\ brachialis|right\\ brachioradialis|right\\ capitate|right\\ coracobrachialis|right\\ extensor\\ carpi\\ radialis\\ brevis|right\\ extensor\\ carpi\\ radialis\\ longus|right\\ extensor\\ digitorum|right\\ extensor\\ pollicis\\ brevis|right\\ extensor\\ pollicis\\ longus|right\\ fifth\\ metacarpal\\ bone|right\\ first\\ metacarpal\\ bone|right\\ flexor\\ carpi\\ radialis|right\\ flexor\\ digitorum\\ profundus|right\\ flexor\\ pollicis\\ longus|right\\ fourth\\ metacarpal\\ bone|right\\ hamate|right\\ humerus|right\\ lunate|right\\ pisiform|right\\ pronator\\ quadratus|right\\ radius|right\\ scaphoid|right\\ second\\ metacarpal\\ bone|right\\ supinator|right\\ third\\ metacarpal\\ bone|right\\ trapezium|right\\ trapezoid|right\\ triquetral|right\\ ulna|short\\ head\\ of\\ right\\ biceps\\ brachii|ulnar\\ head\\ of\\ right\\ extensor\\ carpi\\ ulnaris|ulnar\\ head\\ of\\ right\\ flexor\\ carpi\\ ulnaris|ulnar\\ head\\ of\\ right\\ pronator\\ teres)$"
+  }
+ ],
+ "rail": [
+  "scissors",
+  "sun",
+  "eye",
+  "AI"
+ ],
+ "distance": [
+  [
+   0,
+   4.1
+  ],
+  [
+   1.4,
+   4.1
+  ],
+  [
+   3.8,
+   1.3
+  ],
+  [
+   10,
+   1.18
+  ]
+ ],
+ "target": [
+  [
+   0,
+   [
+    0,
+    0,
+    0
+   ]
+  ],
+  [
+   1.4,
+   [
+    0,
+    0,
+    0
+   ]
+  ],
+  [
+   3.8,
+   [
+    0,
+    -0.3,
+    0
+   ]
+  ],
+  [
+   10,
+   [
+    0,
+    -0.32,
+    0
+   ]
+  ]
+ ],
+ "yaw": [
+  [
+   0,
+   -18
+  ],
+  [
+   10,
+   -32
+  ]
+ ],
+ "pitch": [
+  [
+   0,
+   0
+  ]
+ ],
+ "highlight": {
+  "part": "palmaris",
+  "at": 5.15,
+  "color": "#ffd21f"
+ },
+ "tap": {
+  "part": "palmaris",
+  "at": 5.0,
+  "along": 0.72
+ },
+ "drift": true
+}

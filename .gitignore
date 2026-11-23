@@ -1,0 +1,8 @@
+node_modules/
+.venv/
+__pycache__/
+.DS_Store
+
+# Background track with an unknown license. It stays on this Mac so the skill
+# works, but is not published. Others set MUSIC=/path/to/their-track.m4a.
+content/famous-reel-editor/assets/bg-music.m4a

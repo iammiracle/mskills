@@ -1,0 +1,712 @@
+#!/usr/bin/env python3
+"""mskills: the one place my agent skills come from.
+
+Every skill lives in this repo as <area>/<skill>/SKILL.md and is linked into
+~/.claude/skills. A skill is either:
+
+  owned    mine to change. It never takes updates from anyone.
+  tracked  an unchanged copy of someone else's skill. `update` fetches their
+           new version into the repo; committing it approves it.
+
+sources.json records where each skill came from and which version is approved.
+
+Commands:
+  add <source> <area> [--name NAME] [--replace] [--summary TEXT]
+                        Fetch a skill into an area and link it. <source> is one of:
+                          owner/repo/path/to/skill[@ref]       (GitHub)
+                          https://github.com/owner/repo/tree/<ref>/<path>
+                          https://host/.well-known/agent-skills/<name>
+                          a local folder (added as owned)
+  remove <name>         Delete the skill folder and its link.
+  move <name> <area>    Move a skill to another area.
+  own <name>            Mark a tracked skill as mine; updates stop.
+  update [name ...]     Fetch new versions of tracked skills for review.
+  list                  Every skill, by area.
+  link                  Link every skill into ~/.claude/skills.
+  readme                Rewrite <area>/README.md, one section per skill.
+  check [--quiet]       Report skills Claude loads that did not come through mskills.
+"""
+
+import argparse
+import datetime
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+REPO_DIR = Path(__file__).resolve().parent
+SOURCES_FILE = REPO_DIR / "sources.json"
+SKILLS_DIR = Path(os.environ.get("CLAUDE_SKILLS_DIR", Path.home() / ".claude" / "skills"))
+PLUGINS_FILE = Path.home() / ".claude" / "plugins" / "installed_plugins.json"
+
+# Folders and files that are not part of a skill's content.
+IGNORED_NAMES = {".git", ".DS_Store", "node_modules", ".venv", "__pycache__"}
+# Entries in ~/.claude/skills that the Claude app manages.
+APP_MANAGED_ENTRIES = {"synced"}
+# Names of skills built into Claude Code. A skill with one of these names hides the built-in one.
+BUILT_IN_SKILL_NAMES = {
+    "code-review", "simplify", "security-review", "init", "run", "loop",
+    "schedule", "review", "fewer-permission-prompts", "update-config",
+}
+SCRIPT_SUFFIXES = {".sh", ".py", ".js", ".mjs", ".cjs", ".ts", ".rb", ".pl"}
+
+
+def fail(message):
+    print(f"error: {message}", file=sys.stderr)
+    sys.exit(1)
+
+
+def today():
+    return datetime.date.today().isoformat()
+
+
+# ---------- sources.json ----------
+
+def load_sources():
+    if not SOURCES_FILE.exists():
+        return {}
+    return json.loads(SOURCES_FILE.read_text())
+
+
+def save_sources(sources):
+    ordered = dict(sorted(sources.items()))
+    SOURCES_FILE.write_text(json.dumps(ordered, indent=2) + "\n")
+
+
+# ---------- skills in the repo ----------
+
+def repo_skills():
+    """Map skill name -> folder for every <area>/<skill>/SKILL.md in the repo."""
+    skills = {}
+    for skill_file in sorted(REPO_DIR.glob("*/*/SKILL.md")):
+        folder = skill_file.parent
+        if folder.parent.name.startswith("."):
+            continue
+        name = folder.name
+        if name in skills:
+            fail(f"two skills are named {name}: {skills[name]} and {folder}")
+        skills[name] = folder
+    return skills
+
+
+def find_skill(name):
+    folder = repo_skills().get(name)
+    if folder is None:
+        fail(f"no skill named {name} in mskills")
+    return folder
+
+
+def is_area_name(area):
+    return re.fullmatch(r"[a-z0-9][a-z0-9-]*", area) is not None
+
+
+def content_files(folder):
+    files = []
+    for current, dir_names, file_names in os.walk(folder):
+        dir_names[:] = [d for d in dir_names if d not in IGNORED_NAMES]
+        for file_name in file_names:
+            if file_name in IGNORED_NAMES:
+                continue
+            path = Path(current) / file_name
+            if path.is_file():
+                files.append(path.relative_to(folder))
+    return sorted(files)
+
+
+def content_hash(folder):
+    digest = hashlib.sha256()
+    for relative in content_files(folder):
+        path = folder / relative
+        digest.update(relative.as_posix().encode() + b"\0")
+        digest.update(b"x" if os.access(path, os.X_OK) else b"-")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return "sha256:" + digest.hexdigest()
+
+
+def file_hashes(folder):
+    return {
+        relative.as_posix(): hashlib.sha256((folder / relative).read_bytes()).hexdigest()
+        for relative in content_files(folder)
+    }
+
+
+def frontmatter_name(folder):
+    text = (folder / "SKILL.md").read_text(errors="replace")
+    match = re.search(r"^---\s*\n(.*?)\n---", text, re.S)
+    if not match:
+        return None
+    name_match = re.search(r"^name:\s*['\"]?([^'\"\n]+?)['\"]?\s*$", match.group(1), re.M)
+    return name_match.group(1) if name_match else None
+
+
+def frontmatter_description(folder):
+    """The description from SKILL.md frontmatter, as one line of text."""
+    text = (folder / "SKILL.md").read_text(errors="replace")
+    match = re.search(r"^---\s*\n(.*?)\n---", text, re.S)
+    if not match:
+        return ""
+    lines = match.group(1).split("\n")
+    for index, line in enumerate(lines):
+        found = re.match(r"^description:\s*(.*)$", line)
+        if not found:
+            continue
+        value = found.group(1).strip()
+        if value in ("|", ">", "|-", ">-", ""):
+            continued = []
+            for next_line in lines[index + 1:]:
+                if next_line and not next_line.startswith((" ", "\t")):
+                    break
+                continued.append(next_line.strip())
+            value = " ".join(part for part in continued if part)
+        return value.strip("'\"")
+    return ""
+
+
+def first_sentence(text):
+    match = re.match(r"(.+?[.!?])(\s|$)", text)
+    return match.group(1) if match else text
+
+
+def replace_folder(target, new_content):
+    """Replace target (a skill folder inside the repo) with a copy of new_content."""
+    target = target.resolve()
+    if target.parent.parent != REPO_DIR:
+        fail(f"refusing to replace a folder outside the repo areas: {target}")
+    if target.exists():
+        shutil.rmtree(target)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(new_content, target, symlinks=True, ignore=shutil.ignore_patterns(*IGNORED_NAMES))
+
+
+# ---------- fetching ----------
+
+def run_git(*args, cwd=None):
+    result = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+    if result.returncode != 0:
+        fail(f"git {' '.join(args)} failed:\n{result.stderr.strip()}")
+    return result.stdout.strip()
+
+
+def parse_source(text):
+    """Turn what the user typed into a source record, or None for a local folder."""
+    if Path(text).expanduser().is_dir():
+        return None
+
+    github_url = re.match(r"https://github\.com/([^/]+)/([^/]+)/tree/([^/]+)/(.+?)/?$", text)
+    if github_url:
+        owner, repo, ref, path = github_url.groups()
+        return {"type": "github", "repo": f"{owner}/{repo}", "path": path, "ref": ref}
+
+    well_known = re.match(r"(https://[^/]+/\.well-known/agent-skills)/([^/]+?)(?:/SKILL\.md)?/?$", text)
+    if well_known:
+        base, name = well_known.groups()
+        return {"type": "well-known", "index": f"{base}/index.json", "name": name}
+
+    short = re.match(r"([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/(.+?)(?:@([^@/]+))?$", text)
+    if short:
+        owner, repo, path, ref = short.groups()
+        return {"type": "github", "repo": f"{owner}/{repo}", "path": path.rstrip("/"), "ref": ref or "HEAD"}
+
+    fail(f"cannot read the source {text!r}. Use owner/repo/path, a GitHub tree URL, "
+         "a .well-known/agent-skills URL, or a local folder.")
+
+
+def source_label(source):
+    if source is None:
+        return "-"
+    if source["type"] == "github":
+        ref = "" if source.get("ref", "HEAD") == "HEAD" else f"@{source['ref']}"
+        return f"{source['repo']}/{source['path']}{ref}"
+    if source["type"] == "well-known":
+        return source["index"].replace("/index.json", f"/{source['name']}")
+    return str(source)
+
+
+class Fetcher:
+    """Fetches skills into a temporary folder. Reuses one clone per GitHub repo."""
+
+    def __init__(self):
+        self.work_dir = Path(tempfile.mkdtemp(prefix="mskills-"))
+        self.clones = {}
+        self.checked_out = set()
+
+    def close(self):
+        shutil.rmtree(self.work_dir, ignore_errors=True)
+
+    def fetch(self, source):
+        """Return (folder, version) for the skill the source points at."""
+        if source["type"] == "github":
+            return self._fetch_github(source)
+        if source["type"] == "well-known":
+            return self._fetch_well_known(source)
+        fail(f"unknown source type {source['type']}")
+
+    def prefetch(self, sources):
+        """Check out every GitHub skill path of each repo in one git call, to save round trips."""
+        paths_by_repo = {}
+        for source in sources:
+            if source["type"] == "github":
+                key = (source["repo"], source.get("ref", "HEAD"))
+                paths_by_repo.setdefault(key, []).append(source["path"])
+        for key, paths in paths_by_repo.items():
+            clone = self._clone(key)
+            present = [p for p in paths if run_git("ls-tree", "--name-only", "HEAD", f"{p}/SKILL.md", cwd=clone)]
+            self._check_out(key, clone, present)
+
+    def _clone(self, key):
+        # A sparse clone fetches file contents only for the folders checked out,
+        # in one request per checkout. That is much faster than a full clone.
+        clone = self.clones.get(key)
+        if clone is None:
+            clone = self.work_dir / f"clone-{len(self.clones)}"
+            args = ["clone", "--quiet", "--depth", "1", "--filter=blob:none", "--sparse"]
+            if key[1] != "HEAD":
+                args += ["--branch", key[1]]
+            run_git(*args, f"https://github.com/{key[0]}.git", str(clone))
+            self.clones[key] = clone
+        return clone
+
+    def _check_out(self, key, clone, paths):
+        new_paths = [p for p in paths if (key, p) not in self.checked_out]
+        if not new_paths:
+            return
+        run_git("sparse-checkout", "add", *new_paths, cwd=clone)
+        self.checked_out.update((key, p) for p in new_paths)
+
+    def _fetch_github(self, source):
+        key = (source["repo"], source.get("ref", "HEAD"))
+        clone = self._clone(key)
+        path = source["path"]
+        if not run_git("ls-tree", "--name-only", "HEAD", f"{path}/SKILL.md", cwd=clone):
+            fail(f"{source['repo']} has no {path}/SKILL.md")
+        self._check_out(key, clone, [path])
+        commit = run_git("rev-parse", "HEAD", cwd=clone)
+        return clone / path, commit
+
+    def _fetch_well_known(self, source):
+        index = json.loads(self._download(source["index"]))
+        entry = next((s for s in index.get("skills", []) if s.get("name") == source["name"]), None)
+        if entry is None:
+            fail(f"{source['index']} does not list a skill named {source['name']}")
+        base = source["index"].rsplit("/", 1)[0] + "/" + urllib.parse.quote(source["name"])
+        folder = self.work_dir / f"well-known-{len(list(self.work_dir.iterdir()))}" / source["name"]
+        for relative in entry.get("files", []):
+            parts = Path(relative).parts
+            if Path(relative).is_absolute() or ".." in parts or not parts:
+                fail(f"unsafe file path in {source['index']}: {relative!r}")
+            target = folder / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(self._download(f"{base}/{urllib.parse.quote(relative)}"))
+        if not (folder / "SKILL.md").exists():
+            fail(f"{source['name']} from {source['index']} has no SKILL.md")
+        return folder, None
+
+    @staticmethod
+    def _download(url):
+        request = urllib.request.Request(url, headers={"User-Agent": "mskills"})
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.read()
+
+
+def describe_files(files, limit=5):
+    if len(files) <= limit:
+        return ", ".join(files)
+    return ", ".join(files[:limit]) + f" and {len(files) - limit} more"
+
+
+def script_files(folder, only=None):
+    """Files that can run code: executables and common script types."""
+    found = []
+    for relative in content_files(folder):
+        if only is not None and relative.as_posix() not in only:
+            continue
+        path = folder / relative
+        if relative.suffix in SCRIPT_SUFFIXES or os.access(path, os.X_OK):
+            found.append(relative.as_posix())
+    return found
+
+
+# ---------- links ----------
+
+def link_all(quiet=False):
+    SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+    skills = repo_skills()
+    counts = {"linked": 0, "fixed": 0, "unchanged": 0, "removed": 0, "conflicts": 0}
+
+    for name, folder in skills.items():
+        link = SKILLS_DIR / name
+        if link.is_symlink():
+            target = Path(os.readlink(link))
+            if target == folder:
+                counts["unchanged"] += 1
+                continue
+            if str(target).startswith(str(REPO_DIR) + os.sep):
+                link.unlink()
+                link.symlink_to(folder)
+                print(f"fix link: {name} -> {folder}")
+                counts["fixed"] += 1
+                continue
+            print(f"conflict: {name} is already a link to {target}")
+            counts["conflicts"] += 1
+            continue
+        if link.exists():
+            print(f"conflict: {name} is already a folder in {SKILLS_DIR}")
+            counts["conflicts"] += 1
+            continue
+        link.symlink_to(folder)
+        print(f"link: {name} -> {folder}")
+        counts["linked"] += 1
+
+    for link in SKILLS_DIR.iterdir():
+        if not link.is_symlink():
+            continue
+        target = Path(os.readlink(link))
+        if str(target).startswith(str(REPO_DIR) + os.sep) and not (target / "SKILL.md").exists():
+            link.unlink()
+            print(f"remove broken link: {link.name}")
+            counts["removed"] += 1
+
+    if not quiet or counts["conflicts"]:
+        print(", ".join(f"{key} {value}" for key, value in counts.items()))
+    return counts["conflicts"] == 0
+
+
+# ---------- area readmes ----------
+
+README_NOTE = "<!-- Written by ./mskills from sources.json. Edit summaries there, then run ./mskills readme. -->"
+
+
+def write_readmes():
+    """Write <area>/README.md for every area: one section per skill.
+
+    Areas with no skills left lose their README, and the folder too if it is then empty.
+    """
+    sources = load_sources()
+    by_area = {}
+    for name, folder in repo_skills().items():
+        by_area.setdefault(folder.parent.name, []).append((name, folder))
+
+    for area_dir in sorted(REPO_DIR.iterdir()):
+        if not area_dir.is_dir() or area_dir.name.startswith(".") or area_dir.name in by_area:
+            continue
+        readme = area_dir / "README.md"
+        if readme.exists() and README_NOTE in readme.read_text(errors="replace"):
+            readme.unlink()
+            if not any(area_dir.iterdir()):
+                area_dir.rmdir()
+
+    for area, skills in sorted(by_area.items()):
+        lines = [f"# {area}", "", README_NOTE, "", f"{len(skills)} skill{'s' if len(skills) != 1 else ''}.", ""]
+        for name, folder in sorted(skills):
+            entry = sources.get(name, {"status": "owned"})
+            summary = entry.get("summary") or first_sentence(frontmatter_description(folder))
+            lines += [f"## {name}", "", summary, ""]
+            if entry.get("status") == "tracked":
+                source = entry["source"]
+                if source["type"] == "github":
+                    ref = source.get("ref", "HEAD")
+                    url = f"https://github.com/{source['repo']}/tree/{'HEAD' if ref == 'HEAD' else ref}/{source['path']}"
+                    lines.append(f"- Kind: tracked, from [{source_label(source)}]({url})")
+                else:
+                    lines.append(f"- Kind: tracked, from {source_label(source)}")
+                lines.append(f"- Last approved: {entry.get('updated', 'unknown')}")
+            else:
+                origin = entry.get("origin")
+                lines.append("- Kind: owned" + (f", first copied from {origin}" if origin else ""))
+            if entry.get("note"):
+                lines.append(f"- Note: {entry['note']}")
+            scripts = script_files(folder)
+            if scripts:
+                lines.append(f"- Can run code: yes, {len(scripts)} script file{'s' if len(scripts) != 1 else ''}")
+            lines += [f"- Instructions: [{name}/SKILL.md]({name}/SKILL.md)", ""]
+        (REPO_DIR / area / "README.md").write_text("\n".join(lines))
+
+
+# ---------- commands ----------
+
+def command_add(args):
+    if not is_area_name(args.area):
+        fail("area names are lowercase letters, digits and dashes")
+    source = parse_source(args.source)
+    sources = load_sources()
+    fetcher = Fetcher()
+    try:
+        if source is None:
+            fetched, version = Path(args.source).expanduser().resolve(), None
+        else:
+            fetched, version = fetcher.fetch(source)
+        if not (fetched / "SKILL.md").exists():
+            fail(f"{fetched} has no SKILL.md")
+
+        name = args.name or fetched.name
+        if name in BUILT_IN_SKILL_NAMES:
+            fail(f"{name} is the name of a built-in Claude Code skill; pick another with --name")
+        existing = repo_skills().get(name)
+        if existing is not None and not args.replace:
+            fail(f"{name} already exists at {existing.relative_to(REPO_DIR)}. Use --replace to overwrite it.")
+        if existing is not None and existing.parent.name != args.area:
+            fail(f"{name} is in area {existing.parent.name}; use `move` first or pick that area")
+
+        target = REPO_DIR / args.area / name
+        if fetched.resolve() == target.resolve():
+            fail(f"{args.source} is already {args.area}/{name}")
+        previous_hash = content_hash(target) if target.exists() else None
+        replace_folder(target, fetched)
+    finally:
+        fetcher.close()
+
+    declared_name = frontmatter_name(target)
+    if declared_name and declared_name != name:
+        print(f"note: SKILL.md says name: {declared_name}, but the folder is {name}. "
+              "Claude Code uses the folder name for the link; consider making them match.")
+
+    summary = args.summary or sources.get(name, {}).get("summary") or first_sentence(frontmatter_description(target))
+    if source is None:
+        local_path = str(Path(args.source).expanduser().resolve()).replace(str(Path.home()), "~", 1)
+        sources[name] = {"status": "owned", "origin": f"local folder {local_path}", "added": today()}
+    else:
+        sources[name] = {
+            "status": "tracked",
+            "source": source,
+            "version": version,
+            "hash": content_hash(target),
+            "updated": today(),
+        }
+    sources[name]["summary"] = summary
+    save_sources(sources)
+    write_readmes()
+
+    action = "replaced" if previous_hash else "added"
+    if previous_hash and previous_hash == content_hash(target):
+        action = "replaced (no change)"
+    print(f"{action}: {args.area}/{name} ({sources[name]['status']})")
+    scripts = script_files(target)
+    if scripts:
+        print(f"  contains files that can run code: {describe_files(scripts)}")
+    link_all(quiet=True)
+
+
+def command_remove(args):
+    folder = find_skill(args.name)
+    link = SKILLS_DIR / args.name
+    if link.is_symlink() and Path(os.readlink(link)) == folder:
+        link.unlink()
+    shutil.rmtree(folder)
+    sources = load_sources()
+    sources.pop(args.name, None)
+    save_sources(sources)
+    write_readmes()
+    print(f"removed: {folder.relative_to(REPO_DIR)} (git still has it if it was committed)")
+
+
+def command_move(args):
+    if not is_area_name(args.area):
+        fail("area names are lowercase letters, digits and dashes")
+    folder = find_skill(args.name)
+    target = REPO_DIR / args.area / args.name
+    if folder == target:
+        print(f"{args.name} is already in {args.area}")
+        return
+    target.parent.mkdir(exist_ok=True)
+    folder.rename(target)
+    write_readmes()
+    print(f"moved: {args.name} -> {args.area}/")
+    link_all(quiet=True)
+
+
+def command_own(args):
+    find_skill(args.name)
+    sources = load_sources()
+    entry = sources.get(args.name, {})
+    if entry.get("status") == "owned":
+        print(f"{args.name} is already owned")
+        return
+    origin = source_label(entry.get("source")) if entry.get("source") else None
+    sources[args.name] = {"status": "owned", "added": today()}
+    if origin:
+        sources[args.name]["origin"] = origin
+    if entry.get("summary"):
+        sources[args.name]["summary"] = entry["summary"]
+    save_sources(sources)
+    write_readmes()
+    print(f"owned: {args.name}. It will not take updates any more.")
+
+
+def command_update(args):
+    sources = load_sources()
+    skills = repo_skills()
+    names = args.names or sorted(n for n, e in sources.items() if e.get("status") == "tracked")
+    fetcher = Fetcher()
+    changed, skipped = [], []
+    try:
+        fetcher.prefetch([
+            sources[n]["source"] for n in names
+            if sources.get(n, {}).get("status") == "tracked" and n in skills
+        ])
+        for name in names:
+            entry = sources.get(name)
+            if entry is None or entry.get("status") != "tracked":
+                print(f"skip {name}: not tracked")
+                continue
+            folder = skills.get(name)
+            if folder is None:
+                print(f"skip {name}: listed in sources.json but has no folder")
+                continue
+            if content_hash(folder) != entry["hash"] and not args.force:
+                print(f"skip {name}: changed in this repo since it was approved. "
+                      f"Run `./mskills own {name}` to keep your changes, or `update --force {name}` to drop them.")
+                skipped.append(name)
+                continue
+            fetched, version = fetcher.fetch(entry["source"])
+            new_hash = content_hash(fetched)
+            if new_hash == content_hash(folder):
+                print(f"up to date: {name}")
+                continue
+            old_files = file_hashes(folder)
+            replace_folder(folder, fetched)
+            new_files = file_hashes(folder)
+            touched = {path for path, digest in new_files.items() if old_files.get(path) != digest}
+            entry.update({"version": version, "hash": new_hash, "updated": today()})
+            changed.append(name)
+            print(f"new version: {name}")
+            scripts = script_files(folder, only=touched)
+            if scripts:
+                print(f"  new or changed files that can run code: {describe_files(scripts)}")
+    finally:
+        fetcher.close()
+        save_sources(sources)
+        write_readmes()
+
+    if changed:
+        paths = " ".join(str(skills[n].relative_to(REPO_DIR)) for n in changed)
+        print()
+        print("Review the changes:")
+        print(f"  git diff -- {paths} sources.json")
+        print("Approve them:")
+        print(f"  git add {paths} sources.json && git commit -m 'Update {', '.join(changed)}'")
+        print("Reject them:")
+        print(f"  git restore -- {paths} sources.json && git clean -fd -- {paths}")
+    elif not skipped:
+        print("Everything is up to date.")
+
+
+def command_list(args):
+    sources = load_sources()
+    by_area = {}
+    for name, folder in repo_skills().items():
+        by_area.setdefault(folder.parent.name, []).append(name)
+    for area in sorted(by_area):
+        print(f"{area}/")
+        for name in sorted(by_area[area]):
+            entry = sources.get(name, {"status": "owned"})
+            if entry.get("status") == "tracked":
+                detail = f"tracked  {source_label(entry['source'])}  (approved {entry.get('updated', '?')})"
+            else:
+                origin = entry.get("origin")
+                detail = "owned" + (f"    from {origin}" if origin else "")
+            print(f"  {name:<28} {detail}")
+
+
+def command_link(args):
+    if not link_all():
+        sys.exit(1)
+
+
+def command_check(args):
+    problems = []
+    skills = repo_skills()
+
+    if SKILLS_DIR.exists():
+        for entry in sorted(SKILLS_DIR.iterdir()):
+            if entry.name.startswith(".") or entry.name in APP_MANAGED_ENTRIES:
+                continue
+            if entry.is_symlink():
+                target = Path(os.readlink(entry))
+                if str(target).startswith(str(REPO_DIR) + os.sep):
+                    if not (target / "SKILL.md").exists():
+                        problems.append(f"broken link: {entry.name} -> {target}")
+                    continue
+                problems.append(f"not from mskills: {entry.name} (link to {target})")
+            else:
+                problems.append(f"not from mskills: {entry.name} (folder in {SKILLS_DIR})")
+
+    for name, folder in skills.items():
+        link = SKILLS_DIR / name
+        if not (link.is_symlink() and Path(os.readlink(link)) == folder):
+            problems.append(f"not linked: {name} (run ./mskills link)")
+
+    sources = load_sources()
+    for name in sources:
+        if name not in skills:
+            problems.append(f"in sources.json but no folder: {name}")
+
+    if PLUGINS_FILE.exists():
+        plugins = json.loads(PLUGINS_FILE.read_text()).get("plugins", {})
+        for plugin_id, installs in sorted(plugins.items()):
+            for install in installs:
+                install_path = Path(install.get("installPath", ""))
+                if (install_path / "skills").is_dir():
+                    problems.append(f"plugin with skills: {plugin_id} (bring its skills in with `add`, then uninstall it)")
+                    break
+
+    if problems:
+        print("mskills check found skills that did not come through mskills:")
+        for problem in problems:
+            print(f"  {problem}")
+        sys.exit(1)
+    if not args.quiet:
+        print(f"All {len(skills)} skills come through mskills.")
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="mskills", description=__doc__.split("\n\n")[0])
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    add = commands.add_parser("add", help="fetch a skill into an area")
+    add.add_argument("source")
+    add.add_argument("area")
+    add.add_argument("--name", help="folder name for the skill (default: the source folder name)")
+    add.add_argument("--replace", action="store_true", help="overwrite a skill that already exists")
+    add.add_argument("--summary", help="one sentence for the area README (default: from SKILL.md)")
+    add.set_defaults(handler=command_add)
+
+    remove = commands.add_parser("remove", help="delete a skill and its link")
+    remove.add_argument("name")
+    remove.set_defaults(handler=command_remove)
+
+    move = commands.add_parser("move", help="move a skill to another area")
+    move.add_argument("name")
+    move.add_argument("area")
+    move.set_defaults(handler=command_move)
+
+    own = commands.add_parser("own", help="mark a tracked skill as mine")
+    own.add_argument("name")
+    own.set_defaults(handler=command_own)
+
+    update = commands.add_parser("update", help="fetch new versions of tracked skills")
+    update.add_argument("names", nargs="*")
+    update.add_argument("--force", action="store_true", help="overwrite local changes to tracked skills")
+    update.set_defaults(handler=command_update)
+
+    commands.add_parser("list", help="every skill, by area").set_defaults(handler=command_list)
+    commands.add_parser("link", help="link every skill into ~/.claude/skills").set_defaults(handler=command_link)
+    commands.add_parser("readme", help="rewrite the README in each area").set_defaults(handler=lambda args: write_readmes())
+
+    check = commands.add_parser("check", help="report skills that did not come through mskills")
+    check.add_argument("--quiet", action="store_true", help="print nothing when all is well")
+    check.set_defaults(handler=command_check)
+
+    args = parser.parse_args()
+    args.handler(args)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,4 @@
+# Not secrets: an example key in Cloudflare docs, and HeyGen public client identifiers from their public repo.
+cloudflare/workers-best-practices/references/configuration.md:generic-api-key:82
+content/media-use/audio/scripts/lib/heygen.mjs:generic-api-key:300
+content/media-use/scripts/lib/telemetry.mjs:generic-api-key:12

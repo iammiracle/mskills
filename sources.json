@@ -1,0 +1,462 @@
+{
+  "agents-sdk": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/agents-sdk",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:1aa2bffb82bc7b153b0f4b296e8ea391cab84ceaa42d74dfdac7be3d4c148a91",
+    "updated": "2026-11-23",
+    "summary": "Build AI agents that run on Cloudflare Workers with the Agents SDK."
+  },
+  "anatomy-reel": {
+    "status": "owned",
+    "summary": "Make anatomy app TikToks: a 3D bone or organ with a quiz caption."
+  },
+  "cloudflare": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/cloudflare",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:3254485f42cc1087be55af56f9c24d3e8d68561f200e24e0abe89c94b3f1fdde",
+    "updated": "2026-11-23",
+    "summary": "Pick the right Cloudflare product for a job, and fix Cloudflare error pages."
+  },
+  "cloudflare-email-service": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/cloudflare-email-service",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:c2e7186b833d9023a7806e65a66f889d0a1064490874b8b90fb243c1aa9a8262",
+    "updated": "2026-11-23",
+    "summary": "Send and receive email with Cloudflare."
+  },
+  "codebase-design": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/codebase-design",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:502fa501e804c0d290a87a6bbcee7ec8de98cae7fcfedea54b15366f3815bb8f",
+    "updated": "2026-11-23",
+    "summary": "Design modules with small interfaces that hide a lot of work."
+  },
+  "diagnosing-bugs": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/diagnosing-bugs",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:f2a53ee3bdbbc422ed6c630036b1c7788d39998f44e36f1523e409a60e356fb9",
+    "updated": "2026-11-23",
+    "summary": "A step-by-step loop for hard bugs and slow code."
+  },
+  "domain-modeling": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/domain-modeling",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:f539b1fd2f36333c8b8c4a938a0da744b23a118543663b796a7153fd1cf87bd9",
+    "updated": "2026-11-23",
+    "summary": "Keep a project's glossary and decision records (ADRs) up to date."
+  },
+  "doodle-music-reel": {
+    "status": "owned",
+    "summary": "Make reels where a drawing grows and plays as music."
+  },
+  "durable-objects": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/durable-objects",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:f0f71184ec1179e957834fd1928096bfd4edfb429b37855444d41d6c744a4231",
+    "updated": "2026-11-23",
+    "summary": "Build stateful features such as chat rooms, bookings and games with Durable Objects."
+  },
+  "famous-reel-editor": {
+    "status": "owned",
+    "summary": "Edit a raw talking-head clip into a styled vertical reel with animated graphics."
+  },
+  "figma": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/figma",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:f4e1ec7b402d57ef0cf8610f45190e0e04d42d6db8223946b0a55a42736cde22",
+    "updated": "2026-11-23",
+    "summary": "Use Figma designs, logos and brand tokens in a HyperFrames video."
+  },
+  "find-images": {
+    "status": "owned",
+    "summary": "Find images for content and check their rights, size and crop."
+  },
+  "frontend-design": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "anthropics/claude-plugins-official",
+      "path": "plugins/frontend-design/skills/frontend-design",
+      "ref": "HEAD"
+    },
+    "version": "73c8cf3ea7e296057b467990f2f5d61b4c922260",
+    "hash": "sha256:da98496bc3039fa8edba4ad54b22713e3878c499480edb4f4f5c46b6dd8984f1",
+    "updated": "2026-11-23",
+    "summary": "Give new UI a clear visual direction instead of a template look."
+  },
+  "grilling": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/grilling",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:1d81a7c69dd14a7f1e7a07ac77879aecb5df9ae0f1b82cd64663336fd8935110",
+    "updated": "2026-11-23",
+    "summary": "Question a plan hard until its weak points show."
+  },
+  "handoff": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/handoff",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:7235f698ae8172e953c7d115fbd001872703861e6bef6085e622dfdddfaa382c",
+    "updated": "2026-11-23",
+    "summary": "Write a handoff note so a fresh session can pick up the work. Type /handoff to use it."
+  },
+  "hyperframes": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/hyperframes",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:3de9ac7395d34dd1e8c523448cd8630623b292511a6ae77660d79813af0d052d",
+    "updated": "2026-11-23",
+    "summary": "Make and render videos from HTML with HyperFrames. Read it first for any HyperFrames video."
+  },
+  "hyperframes-cli": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/hyperframes-cli",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:03da0db74f386facdc8b7033dbe210a80fbb12f338516b3f85ae8528e52b8db3",
+    "updated": "2026-11-23",
+    "summary": "Use the HyperFrames command line: scaffold, preview, render and share."
+  },
+  "hyperframes-registry": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/hyperframes-registry",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:23c121881eefce5f39d57fc4eb36e7c82b494ad35577e2d69c39b9e57899f963",
+    "updated": "2026-11-23",
+    "summary": "About 450 ready-made HyperFrames blocks: transitions, titles, captions, charts and more."
+  },
+  "ios-design": {
+    "status": "tracked",
+    "source": {
+      "type": "well-known",
+      "index": "https://uizze.sh/.well-known/agent-skills/index.json",
+      "name": "ios-design"
+    },
+    "version": null,
+    "hash": "sha256:42c442e0b1ed3624e0cc7023ea2a3adbb00eea0becf6409487506df3cb4c5464",
+    "updated": "2026-11-23",
+    "summary": "Design and review iPhone app screens, following Apple's guidelines."
+  },
+  "iq-puzzle-reel": {
+    "status": "owned",
+    "summary": "Make IQ puzzle game ad reels with a hand solving puzzles on paper."
+  },
+  "make-content": {
+    "status": "owned",
+    "summary": "Make short videos for my apps and channels, from idea to MP4 and caption."
+  },
+  "media-use": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/media-use",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:7d7437794e9c43fb8e5403fa9c077a334c5de675cf5d748e3fd17d65ffd8edeb",
+    "updated": "2026-11-23",
+    "summary": "Get or make media for a HyperFrames video: music, voiceover, images and transcripts."
+  },
+  "migrate-radix-to-base": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "shadcn/ui",
+      "path": "skills/migrate-radix-to-base",
+      "ref": "HEAD"
+    },
+    "version": "055aa6b7837b1808456a24beb4c97a677864aa82",
+    "hash": "sha256:2eabf46266ac1f549a2a6bc048c9e98ed1fd7f403f94fe18594ae6fbe3e38a99",
+    "updated": "2026-11-23",
+    "summary": "Move React and shadcn projects from Radix UI to Base UI."
+  },
+  "pr": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/pr",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:38a203817ccfbe58635f0e8f55a016388c35718c285b12ad03271cd31ee6d71d",
+    "updated": "2026-11-23",
+    "summary": "Write pull request descriptions."
+  },
+  "prototype": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/prototype",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:c0f85d7fb6fdaf1e952c5cccf3454f43c2fd8321fd52cec01acae452d37a713e",
+    "updated": "2026-11-23",
+    "summary": "Build a throwaway prototype to answer a design question."
+  },
+  "remotion-to-hyperframes": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/remotion-to-hyperframes",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:244f6d7d9dc4fc88650698a3dd6f0959d770280c7250840ac97e53b1eccedfc4",
+    "updated": "2026-11-23",
+    "summary": "Move a video from Remotion or other animation tools into HyperFrames."
+  },
+  "research": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/research",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:ceb3a616a2dfbf83491710dad8b0d97aa6722060c7bf95ff2940f6249ef409ab",
+    "updated": "2026-11-23",
+    "summary": "Research a question from primary sources and save the findings as a Markdown file."
+  },
+  "reverse-engineer-anything": {
+    "status": "owned",
+    "origin": "the REA tools install (no public source)",
+    "added": "2026-11-23",
+    "summary": "Inspect apps, binaries and web bundles with the REA tools."
+  },
+  "review-standards-and-spec": {
+    "status": "owned",
+    "origin": "mattpocock/skills/skills/engineering/code-review",
+    "added": "2026-11-23",
+    "note": "renamed from code-review so it does not hide the built-in /code-review; issue-tracker setup removed",
+    "summary": "Review a branch against the repo's coding rules and against its spec, as two separate reports."
+  },
+  "sandbox-sdk": {
+    "status": "owned",
+    "origin": "cloudflare/skills/skills/sandbox-sdk",
+    "added": "2026-11-23",
+    "note": "no longer upstream; replaced there by sandbox-stable and sandbox-next",
+    "summary": "Run untrusted code in Cloudflare sandboxes. Cloudflare has replaced it upstream with sandbox-stable and sandbox-next."
+  },
+  "shadcn": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "shadcn/ui",
+      "path": "skills/shadcn",
+      "ref": "HEAD"
+    },
+    "version": "055aa6b7837b1808456a24beb4c97a677864aa82",
+    "hash": "sha256:11748efcc98aa347204c0dee2fdc4343dde81f191522ec0e242066bab406e772",
+    "updated": "2026-11-23",
+    "summary": "Add, fix and style shadcn/ui components."
+  },
+  "simple-english": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "AminBlg/SimpleEnglish",
+      "path": "skills/simple-english",
+      "ref": "HEAD"
+    },
+    "version": "300432a9e4c473229a7049ab61b8ca2522d9214c",
+    "hash": "sha256:7b4b215ce1efcac7dd52d1b6b000c72ddb337132a57d9b2d5d7e8997a6e21138",
+    "updated": "2026-11-23",
+    "summary": "Write or rewrite text in plain English anyone can read."
+  },
+  "slideshow": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "heygen-com/hyperframes",
+      "path": "skills/slideshow",
+      "ref": "HEAD"
+    },
+    "version": "40ce145f27afc70f38e50199ba07cc298dfa4baa",
+    "hash": "sha256:ae2e87fe558be6809d72de56a03a15ae63fbe318a7e773bce26696f19c9c92b3",
+    "updated": "2026-11-23",
+    "summary": "Build a HyperFrames slideshow to present live, with speaker notes."
+  },
+  "social-data": {
+    "status": "owned",
+    "summary": "Pull stats, top posts and transcripts from Instagram, TikTok, YouTube and other platforms."
+  },
+  "tdd": {
+    "status": "owned",
+    "origin": "mattpocock/skills/skills/engineering/tdd",
+    "added": "2026-11-23",
+    "note": "points at review-standards-and-spec",
+    "summary": "Build features and fix bugs test-first."
+  },
+  "turnstile-spin": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/turnstile-spin",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:5388676a569f7a6578c626526ef2bbaf1e5fe814c8516b92853f56f836fcd34f",
+    "updated": "2026-11-23",
+    "summary": "Add Cloudflare Turnstile bot checks to a form, on the front end and the server."
+  },
+  "ui-taste": {
+    "status": "tracked",
+    "source": {
+      "type": "well-known",
+      "index": "https://uizze.sh/.well-known/agent-skills/index.json",
+      "name": "ui-taste"
+    },
+    "version": null,
+    "hash": "sha256:965bb996c6b46a29907e45d339e92a03f07240673973f586e3ef9b9f89e29a48",
+    "updated": "2026-11-23",
+    "summary": "Design, build and review web and iOS UI that does not look generic."
+  },
+  "viral-video-writing": {
+    "status": "owned",
+    "summary": "Write video scripts and hooks that people watch to the end."
+  },
+  "web-perf": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/web-perf",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:f3028d368530ba77e2e1c95d833da3aaa09972203b1eb9b9840bf1331a3eb629",
+    "updated": "2026-11-23",
+    "summary": "Measure and improve page speed and Core Web Vitals."
+  },
+  "wizard": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/engineering/wizard",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:f119c9dda37e1aca09a281f552e5984441ab4caa2c537e4f549d7d0d3b23079d",
+    "updated": "2026-11-23",
+    "summary": "Write a step-by-step terminal script for setup only a person can do, such as dashboards and secrets."
+  },
+  "workers-best-practices": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/workers-best-practices",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:7f9809cf4ae0964b941ffe7c5d93e2d968579bbce1f7ccb00534119e27126b2d",
+    "updated": "2026-11-23",
+    "summary": "Write and review Workers code against production best practices."
+  },
+  "wrangler": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/wrangler",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:0bdea5f1726706cd2c9b087b47e7e698e8f61ead680c2820899f76baba545b57",
+    "updated": "2026-11-23",
+    "summary": "Run and fix wrangler commands: local development, deploys and resources."
+  },
+  "writing-for-agents": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "mattpocock/skills",
+      "path": "skills/productivity/writing-for-agents",
+      "ref": "HEAD"
+    },
+    "version": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
+    "hash": "sha256:48a8943a613f4d30774dbcd500abea6a762b47d00ea61281f99d83c49f0e9a37",
+    "updated": "2026-11-23",
+    "summary": "Write skills and CLAUDE.md files that agents follow well."
+  }
+}

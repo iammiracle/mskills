@@ -1,0 +1,6 @@
+{
+  "name": "anatomy-reel-render3d",
+  "private": true,
+  "description": "Renders real BodyParts3D anatomy meshes to video with Three.js in headless Chrome.",
+  "dependencies": { "puppeteer": "24.40.0" }
+}

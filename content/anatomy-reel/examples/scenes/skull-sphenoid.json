@@ -1,0 +1,74 @@
+{
+ "duration": 10,
+ "parts": [
+  {
+   "match": "^sphenoid bone$",
+   "id": "sphenoid",
+   "look": "bone"
+  },
+  {
+   "match": "^(frontal bone|occipital bone|ethmoid|mandible|hyoid bone|vomer|(left|right) (parietal bone|temporal bone|maxilla|zygomatic bone|nasal bone|lacrimal bone|palatine bone|inferior nasal concha))$",
+   "look": "bone"
+  },
+  {
+   "match": "^(left|right) (upper|lower) .*secondary .*tooth$",
+   "look": "tooth"
+  }
+ ],
+ "rail": [
+  "scissors",
+  "sun",
+  "eye",
+  "AI"
+ ],
+ "distance": [
+  [
+   0,
+   6.4
+  ],
+  [
+   10,
+   5.4
+  ]
+ ],
+ "target": [
+  [
+   0,
+   [
+    0,
+    -0.08,
+    0
+   ]
+  ]
+ ],
+ "yaw": [
+  [
+   0,
+   -38
+  ],
+  [
+   10,
+   150
+  ]
+ ],
+ "pitch": [
+  [
+   0,
+   6
+  ]
+ ],
+ "highlight": {
+  "part": "sphenoid",
+  "at": 2.6,
+  "color": "#ffd21f"
+ },
+ "ghost": {
+  "at": 3.0,
+  "opacity": 0.14
+ },
+ "tap": {
+  "part": "sphenoid",
+  "at": 2.45,
+  "along": 0.6
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "duration": 10,
+ "parts": [
+  {
+   "match": "^wall of heart$",
+   "look": "heart"
+  },
+  {
+   "match": "^anterior interventricular branch of left coronary artery, nsn$",
+   "id": "lad",
+   "look": "artery"
+  },
+  {
+   "match": "^(trunk of right coronary artery|marginal branch of right coronary artery|posterior interventricular branch of right coronary artery, nsn|circumflex branch of left coronary artery|stem of left coronary artery|right posterolateral branch of right coronary artery)$",
+   "look": "artery"
+  },
+  {
+   "match": "^(great cardiac vein|middle cardiac vein|coronary sinus|set of anterior cardiac veins|set of posterior veins of left ventricle|superior vena cava)$",
+   "look": "vein"
+  },
+  {
+   "match": "^(ascending aorta|arch of aorta)$",
+   "look": "artery"
+  }
+ ],
+ "rail": [
+  "pen",
+  "sun",
+  "eye",
+  "AI"
+ ],
+ "distance": [
+  [
+   0,
+   4.9
+  ],
+  [
+   1.2,
+   4.9
+  ],
+  [
+   3.4,
+   3.4
+  ]
+ ],
+ "target": [
+  [
+   0,
+   [
+    0,
+    0.02,
+    0
+   ]
+  ],
+  [
+   1.2,
+   [
+    0,
+    0.02,
+    0
+   ]
+  ],
+  [
+   3.4,
+   [
+    -0.08,
+    -0.12,
+    0
+   ]
+  ]
+ ],
+ "yaw": [
+  [
+   0,
+   -10
+  ],
+  [
+   3.4,
+   -38
+  ],
+  [
+   10,
+   -38
+  ]
+ ],
+ "pitch": [
+  [
+   0,
+   -4
+  ]
+ ],
+ "arrow": {
+  "part": "lad",
+  "along": 0.55,
+  "at": 4.6,
+  "offset": [
+   -240,
+   -220
+  ],
+  "color": "#ffd21f"
+ }
+}

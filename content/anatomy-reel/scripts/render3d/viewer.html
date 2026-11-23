@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  canvas { display: block; }
+  #ui { position: fixed; inset: 0; pointer-events: none; font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif; }
+  .rail { position: absolute; right: 34px; top: 230px; display: flex; flex-direction: column; gap: 26px; }
+  .btn { width: 76px; height: 76px; border-radius: 50%; background: rgba(40,40,44,.72); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 26px; }
+  .btn svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .top { position: absolute; left: 34px; top: 120px; display: flex; gap: 22px; }
+  .tabs { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); display: flex; gap: 14px; }
+  .tab { width: 118px; height: 112px; border-radius: 22px; background: rgba(38,38,42,.78); color: #d8d8dc; font-size: 19px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .tab.on { background: rgba(70,70,76,.92); color: #fff; }
+  .tab svg { width: 40px; height: 40px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  #ring { position: absolute; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; background: rgba(255,255,255,.28); border: 3px solid rgba(255,255,255,.55); opacity: 0; }
+  #ink { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="ui"></div>
+<script type="module">
+import * as THREE from 'three'
+import { STLLoader } from 'three/addons/loaders/STLLoader.js'
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+
+const cfg = await (await fetch(new URLSearchParams(location.search).get('scene'))).json()
+const W = cfg.width ?? 1080, H = cfg.height ?? 1920
+
+// ---------- renderer, light, look ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
+renderer.setPixelRatio(1)
+renderer.setSize(W, H)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = cfg.exposure ?? 0.9
+document.body.prepend(renderer.domElement)
+
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(cfg.background ?? '#000000')
+const pmrem = new THREE.PMREMGenerator(renderer)
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+scene.environmentIntensity = cfg.envIntensity ?? 0.22
+
+const key = new THREE.DirectionalLight(0xfff1dc, 2.6); key.position.set(3, 3.5, 3)
+const fill = new THREE.DirectionalLight(0xbfd4ff, 0.35); fill.position.set(-4, 0.5, 2)
+const rim = new THREE.DirectionalLight(0xffffff, 1.6); rim.position.set(-2, 2.5, -5)
+scene.add(key, fill, rim, new THREE.HemisphereLight(0xffffff, 0x111111, 0.18))
+
+// Fine noise so bone isn't plastic and muscle shows fibres (procedural, no UVs needed).
+const bump = (fibre) => (shader) => {
+  shader.vertexShader = shader.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vObjPos;')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObjPos = position;')
+  shader.fragmentShader = shader.fragmentShader
+    .replace('#include <common>', `#include <common>
+varying vec3 vObjPos;
+float h3(vec3 p){ p = fract(p*0.3183099+.1); p*=17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+float n3(vec3 x){ vec3 i=floor(x); vec3 f=fract(x); f=f*f*(3.0-2.0*f);
+  return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z); }`)
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+{ vec3 q = vObjPos * ${fibre ? '0.9' : '1.6'};
+  ${fibre ? 'float ph = q.z*7.0 + n3(q*0.7)*4.0; float aa = clamp(1.0 - fwidth(ph)/2.5, 0.0, 1.0); float s = (sin(ph)*0.5 + 0.5)*aa + 0.5*(1.0-aa); float g = s*0.10*aa + n3(q*3.0)*0.05;'
+          : 'float g = n3(q)*0.14 + n3(q*3.1)*0.08 + step(0.93, n3(q*5.0))*0.25;'}
+  normal =normalize(normal + vec3(dFdx(g), dFdy(g), 0.0) * 6.0); }`)
+  shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+  ${fibre ? 'float ph2 = vObjPos.z*0.9*7.0 + n3(vObjPos*0.63)*4.0; float aa2 = clamp(1.0 - fwidth(ph2)/2.5, 0.0, 1.0); diffuseColor.rgb *= 0.97 + 0.22 * aa2 * (sin(ph2)*0.5 - 0.5) + 0.0;'
+          : 'diffuseColor.rgb *= (0.86 + 0.2 * n3(vObjPos*0.5)) * (1.0 - 0.35*step(0.94, n3(vObjPos*8.0)));'}`)
+}
+
+const LOOKS = {
+  bone:   { color: '#d8c9a8', roughness: 0.58, sheen: 0.0, fibre: false },
+  muscle: { color: '#a52a26', roughness: 0.48, clearcoat: 0.25, fibre: true },
+  tendon: { color: '#e9e4dc', roughness: 0.35, clearcoat: 0.4, fibre: true },
+  artery: { color: '#c8201c', roughness: 0.35, clearcoat: 0.5, fibre: false },
+  vein:   { color: '#2f5bd3', roughness: 0.35, clearcoat: 0.5, fibre: false },
+  nerve:  { color: '#f2c94c', roughness: 0.4, clearcoat: 0.3, fibre: false },
+  tooth:  { color: '#f1ece0', roughness: 0.3, clearcoat: 0.6, fibre: false },
+  heart:  { color: '#8e2a26', roughness: 0.5, clearcoat: 0.35, fibre: true },
+  brain:  { color: '#d8a39b', roughness: 0.6, clearcoat: 0.2, fibre: false },
+  organ:  { color: '#b5554a', roughness: 0.45, clearcoat: 0.4, fibre: false },
+}
+const material = (look) => {
+  const L = LOOKS[look] || LOOKS.bone
+  const m = new THREE.MeshPhysicalMaterial({ color: L.color, roughness: L.roughness, clearcoat: L.clearcoat ?? 0, clearcoatRoughness: 0.5 })
+  m.onBeforeCompile = bump(L.fibre)
+  m.userData.base = new THREE.Color(L.color)
+  return m
+}
+
+// ---------- load the parts (BodyParts3D: millimetres, Z up) ----------
+const loader = new STLLoader()
+const model = new THREE.Group()
+const parts = {}
+await Promise.all(cfg.parts.map(async (p) => {
+  let g = await loader.loadAsync(p.file)
+  g.deleteAttribute('normal')
+  g = mergeVertices(g, 0.01)
+  g.computeVertexNormals()
+  const mesh = new THREE.Mesh(g, material(p.look))
+  mesh.name = p.id || p.file
+  parts[mesh.name] = mesh
+  model.add(mesh)
+}))
+model.rotation.x = -Math.PI / 2            // Z-up -> Y-up
+const pivot = new THREE.Group(); pivot.add(model); scene.add(pivot)
+// centre the model on the pivot so it spins in place
+const b2 = new THREE.Box3().setFromObject(pivot); const c2 = b2.getCenter(new THREE.Vector3())
+model.position.sub(c2)
+const size = b2.getSize(new THREE.Vector3())
+const radius = Math.max(size.x, size.y, size.z) / 2
+window.__info = { size: size.toArray(), radius }
+
+const camera = new THREE.PerspectiveCamera(cfg.fov ?? 30, W / H, radius / 50, radius * 50)
+
+// ---------- UI chrome (HTML so text and icons stay crisp) ----------
+const ICONS = {
+  scissors: '<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg>',
+  sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  home: '<svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 9.5V20h5v-6h4v6h5V9.5"/></svg>',
+  layers: '<svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 13 9 5 9-5"/></svg>',
+  pen: '<svg viewBox="0 0 24 24"><path d="M4 20h4L20 8l-4-4L4 16v4z"/></svg>',
+  bone: '<svg viewBox="0 0 24 24"><path d="M7 4a2.5 2.5 0 0 0-3 3 2.5 2.5 0 0 0 3 3l7 7a2.5 2.5 0 0 0 3 3 2.5 2.5 0 0 0 3-3 2.5 2.5 0 0 0-3-3l-7-7a2.5 2.5 0 0 0-3-3z"/></svg>',
+  muscle: '<svg viewBox="0 0 24 24"><path d="M4 15c3-1 4-6 8-7s6 2 7 5-1 6-4 6H8c-2 0-4-1-4-4z"/><path d="M9 12c1 1 3 1 4 0"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>',
+  artery: '<svg viewBox="0 0 24 24"><path d="M12 21V9M12 13 7 8M12 11l5-5M7 8 5 5M17 6l2-2M7 8 4 9"/></svg>',
+  nerve: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V3M14.2 13.3 19 17M9.8 13.3 5 17M14.5 11 20 9M9.5 11 4 9"/></svg>',
+  lungs: '<svg viewBox="0 0 24 24"><path d="M12 4v8M12 10c-2 0-3 1-3 1M12 10c2 0 3 1 3 1"/><path d="M9 7c-3 1-5 6-5 10 0 2 2 3 4 2s1-6 1-12zM15 7c3 1 5 6 5 10 0 2-2 3-4 2s-1-6-1-12z"/></svg>',
+}
+const ui = document.getElementById('ui')
+if (cfg.ui !== 'none') {
+  ui.innerHTML = `
+    <div class="top">${['home', 'layers'].map((i) => `<div class="btn">${ICONS[i]}</div>`).join('')}</div>
+    <div class="rail">${(cfg.rail ?? ['scissors', 'sun', 'eye', 'AI']).map((i) => `<div class="btn">${ICONS[i] || i}</div>`).join('')}</div>
+    ${cfg.tabs ? `<div class="tabs">${cfg.tabs.map((t) => `<div class="tab${t.on ? ' on' : ''}">${ICONS[t.icon] || ''}<span>${t.label}</span></div>`).join('')}</div>` : ''}`
+}
+ui.insertAdjacentHTML('beforeend', '<div id="ring"></div><svg id="ink" viewBox="0 0 ' + W + ' ' + H + '"></svg>')
+const ring = document.getElementById('ring'), ink = document.getElementById('ink')
+
+// ---------- timeline ----------
+const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x))
+const track = (keys, t) => { // keys: [[time, value], ...] numbers or arrays
+  if (!keys) return undefined
+  if (t <= keys[0][0]) return keys[0][1]
+  for (let i = 1; i < keys.length; i++) {
+    const [t1, v1] = keys[i], [t0, v0] = keys[i - 1]
+    if (t <= t1) { const k = ease((t - t0) / (t1 - t0)); return Array.isArray(v0) ? v0.map((a, j) => a + (v1[j] - a) * k) : v0 + (v1 - v0) * k }
+  }
+  return keys[keys.length - 1][1]
+}
+const hi = new THREE.Color(cfg.highlight?.color ?? '#ffd21f')
+// screen position of a part: average of its points at height `along` (0 = bottom, 1 = top)
+const pointOn = (id, along = 0.65) => {
+  camera.updateMatrixWorld(); pivot.updateMatrixWorld(true)
+  const mesh = parts[id], pos = mesh.geometry.attributes.position, v = new THREE.Vector3(), pts = []
+  for (let i = 0; i < pos.count; i += Math.max(1, Math.floor(pos.count / 600))) pts.push(v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld).clone())
+  pts.sort((a, b) => a.y - b.y)
+  const at = Math.round(along * (pts.length - 1)), band = pts.slice(Math.max(0, at - 30), at + 30)
+  // snap to a real point on the surface (a branching vessel's average can fall in a gap)
+  const mean = band.reduce((s, p) => s.add(p), new THREE.Vector3()).divideScalar(band.length)
+  const c = band.reduce((a, b) => (b.distanceTo(mean) < a.distanceTo(mean) ? b : a)).clone().project(camera)
+  return [(c.x + 1) / 2 * W, (1 - c.y) / 2 * H]
+}
+let arrowPts = null
+const deg = Math.PI / 180
+
+window.renderAt = (t) => {
+  // model spin: yaw/pitch in degrees, keyframed
+  pivot.rotation.y = (track(cfg.yaw, t) ?? 0) * deg
+  pivot.rotation.x = (track(cfg.pitch, t) ?? 0) * deg
+  pivot.rotation.z = (track(cfg.roll, t) ?? 0) * deg
+  // camera: distance in model radii, target offset in radii, slight handheld drift
+  const dist = (track(cfg.distance, t) ?? 3.2) * radius
+  const tgt = (track(cfg.target, t) ?? [0, 0, 0]).map((v) => v * radius)
+  const drift = cfg.drift ? [Math.sin(t * 1.3) * 0.004, Math.sin(t * 0.9 + 1) * 0.004] : [0, 0]
+  camera.position.set(tgt[0] + drift[0] * dist, tgt[1] + drift[1] * dist, tgt[2] + dist)
+  camera.lookAt(tgt[0], tgt[1], tgt[2])
+  // highlight one part: fades to the highlight colour and glows a little
+  if (cfg.highlight) {
+    const k = ease((t - cfg.highlight.at) / 0.25)
+    const m = parts[cfg.highlight.part].material
+    m.color.copy(m.userData.base).lerp(hi, k)
+    m.emissive = hi.clone().multiplyScalar(0.28 * k)
+  }
+  // ghost: every other part fades to see-through so the highlighted one shows inside
+  if (cfg.ghost) {
+    const k = ease((t - cfg.ghost.at) / 0.6), keep = cfg.ghost.keep || [cfg.highlight?.part]
+    for (const [id, mesh] of Object.entries(parts)) {
+      if (keep.includes(id)) continue
+      const m = mesh.material, o = 1 - (1 - (cfg.ghost.opacity ?? 0.16)) * k
+      const tr = o < 0.999
+      if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true }
+      m.opacity = o; m.depthWrite = !tr
+    }
+  }
+  // tap ring (the iOS screen-recording touch dot)
+  if (cfg.tap) {
+    const a = t - cfg.tap.at
+    let x = cfg.tap.x, y = cfg.tap.y
+    if (cfg.tap.part) { [x, y] = pointOn(cfg.tap.part, cfg.tap.along ?? 0.65); x += cfg.tap.dx || 0; y += cfg.tap.dy || 0 }
+    ring.style.left = x + 'px'; ring.style.top = y + 'px'
+    ring.style.opacity = a > 0 && a < 0.45 ? String(1 - a / 0.45) : '0'
+  }
+  // markup ink: an arrow drawn stroke by stroke (points in screen px)
+  if (cfg.arrow) {
+    let { from, to, at, color = '#ffd21f', width = 9 } = cfg.arrow
+    if (cfg.arrow.part) { // ink is drawn on the glass: aim it once when drawing starts, then it stays put
+      if (!arrowPts && t >= at) { const p = pointOn(cfg.arrow.part, cfg.arrow.along ?? 0.5), o = cfg.arrow.offset ?? [-230, 230]
+        arrowPts = { to: [p[0] + (cfg.arrow.dx || 0), p[1] + (cfg.arrow.dy || 0)] }; arrowPts.from = [arrowPts.to[0] + o[0], arrowPts.to[1] + o[1]]
+        if ([arrowPts.to, arrowPts.from].some(([x, y]) => x < 0 || y < 0 || x > W || y > H)) console.error('arrow is off screen: ' + JSON.stringify(arrowPts) + ' - pull the camera back or change offset') }
+      if (!arrowPts) { from = to = [0, 0] } else { from = arrowPts.from; to = arrowPts.to }
+    }
+    const k = Math.min(1, Math.max(0, (t - at) / 0.6)), k2 = Math.min(1, Math.max(0, (t - at - 0.65) / 0.25))
+    const x = from[0] + (to[0] - from[0]) * k, y = from[1] + (to[1] - from[1]) * k
+    const ang = Math.atan2(to[1] - from[1], to[0] - from[0]), L = 46
+    const hx1 = to[0] - L * Math.cos(ang - 0.5), hy1 = to[1] - L * Math.sin(ang - 0.5)
+    const hx2 = to[0] - L * Math.cos(ang + 0.5), hy2 = to[1] - L * Math.sin(ang + 0.5)
+    ink.innerHTML = k > 0 ? `<g stroke="${color}" stroke-width="${width}" stroke-linecap="round" fill="none">
+      <path d="M${from[0]} ${from[1]} L${x} ${y}"/>
+      ${k2 > 0 ? `<path d="M${to[0]} ${to[1]} L${to[0] + (hx1 - to[0]) * k2} ${to[1] + (hy1 - to[1]) * k2}"/><path d="M${to[0]} ${to[1]} L${to[0] + (hx2 - to[0]) * k2} ${to[1] + (hy2 - to[1]) * k2}"/>` : ''}</g>` : ''
+  }
+  renderer.render(scene, camera)
+}
+window.renderAt(0)
+window.__ready = true
+</script>
+</body>
+</html>

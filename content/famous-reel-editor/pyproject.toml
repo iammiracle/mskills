@@ -1,0 +1,12 @@
+[project]
+name = "famous-reel-editor"
+version = "0.1.0"
+description = "Scripts for the famous-reel-editor skill (cut, trim, captions, transcription)"
+requires-python = ">=3.15"
+dependencies = [
+    "pillow",
+    "requests",
+]
+
+[tool.uv]
+package = false

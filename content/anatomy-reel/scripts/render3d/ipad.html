@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  canvas { display: block; }
+  /* phone-camera feel: soft vignette over the whole frame */
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 70% at 50% 52%, rgba(0,0,0,0) 55%, rgba(0,0,0,.38) 100%); }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="vig"></div>
+<script type="module">
+// "Phone filming an iPad on a desk", built in code: a wooden desk, an iPad, and the app's
+// screen recording (frames rendered by viewer.html) playing on its screen, with a ceiling-light
+// streak on the glass and a little handheld drift. No AI video model.
+import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+
+const cfg = await (await fetch(new URLSearchParams(location.search).get('scene'))).json()
+const W = 1080, H = 1920, FPS = cfg.fps || 30
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
+renderer.setPixelRatio(1); renderer.setSize(W, H)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 1.0
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap
+document.body.prepend(renderer.domElement)
+
+const scene = new THREE.Scene()
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture
+scene.environmentIntensity = 0.3
+const sun = new THREE.DirectionalLight(0xffe2bd, 2.2); sun.position.set(-120, 420, 160)
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.radius = 8
+Object.assign(sun.shadow.camera, { left: -300, right: 300, top: 300, bottom: -300, near: 10, far: 1200 })
+scene.add(sun, new THREE.HemisphereLight(0xfff4e6, 0x4a3420, 0.7))
+
+// ---- desk: procedural honey wood (canvas texture, no image files) ----
+const woodTex = (() => {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 2048
+  const g = c.getContext('2d'), img = g.createImageData(c.width, c.height), d = img.data
+  const tone = cfg.wood ?? [168, 108, 52]
+  const hash = (n) => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s) }
+  const noise = (x) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return hash(i) * (1 - u) + hash(i + 1) * u }
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+    const w = x / c.width * 26 + noise(y / 220) * 3.2 + noise(y / 37 + x / 400) * 0.6
+    const ring = 0.5 + 0.5 * Math.sin(w * 2.2 + noise(w * 3) * 2.5)
+    const fine = noise(x * 0.9 + y * 0.004) * 0.18
+    const k = 0.78 + ring * 0.2 + fine - 0.09
+    const i = (y * c.width + x) * 4
+    d[i] = tone[0] * k; d[i + 1] = tone[1] * k; d[i + 2] = tone[2] * k * 0.95; d[i + 3] = 255
+  }
+  g.putImageData(img, 0, 0)
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8
+  return t
+})()
+const desk = new THREE.Mesh(new THREE.PlaneGeometry(900, 1400), new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.42, metalness: 0 }))
+desk.rotation.x = -Math.PI / 2; desk.rotation.z = 0.04; desk.receiveShadow = true
+scene.add(desk)
+
+// ---- iPad (11-inch: 178 x 248 mm), lying flat, turned a few degrees ----
+const ipad = new THREE.Group(); ipad.rotation.y = (cfg.ipadTurn ?? -6) * Math.PI / 180; scene.add(ipad)
+const body = new THREE.Mesh(new RoundedBoxGeometry(178, 6, 248, 6, 10), new THREE.MeshStandardMaterial({ color: 0x9a9b9f, metalness: 0.7, roughness: 0.45, envMapIntensity: 0.4 }))
+body.position.y = 3; body.castShadow = true; ipad.add(body)
+const glassShape = (w, h, r) => { const s = new THREE.Shape(), x = -w / 2, y = -h / 2
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r)
+  s.quadraticCurveTo(x + w, y + h, x + w - r, y + h); s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r)
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s }
+const bezel = new THREE.Mesh(new THREE.ShapeGeometry(glassShape(176, 246, 9.5), 12), new THREE.MeshPhysicalMaterial({ color: 0x050506, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 }))
+bezel.rotation.x = -Math.PI / 2; bezel.position.y = 6.05; ipad.add(bezel)
+const screenMat = new THREE.MeshBasicMaterial({ toneMapped: false })
+const SW = 160.6, SH = 230 // the lit display area
+const screen = new THREE.Mesh(new THREE.ShapeGeometry(glassShape(SW, SH, 6), 12), screenMat)
+// ShapeGeometry UVs are in shape units; remap to 0..1
+const uv = screen.geometry.attributes.uv, p = screen.geometry.attributes.position
+for (let i = 0; i < uv.count; i++) uv.setXY(i, p.getX(i) / SW + 0.5, p.getY(i) / SH + 0.5)
+screen.rotation.x = -Math.PI / 2; screen.position.y = 6.1; ipad.add(screen)
+// glass reflection on top of the screen (environment) for a little sheen
+const glass = new THREE.Mesh(new THREE.ShapeGeometry(glassShape(176, 246, 9.5), 12), new THREE.MeshPhysicalMaterial({ color: 0x000000, transparent: true, opacity: 0.12, roughness: 0.05, metalness: 0, clearcoat: 1 }))
+glass.rotation.x = -Math.PI / 2; glass.position.y = 6.2; ipad.add(glass)
+
+// ceiling-light streak: a soft white band reflected on the glass
+const streakTex = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 512; const g = c.getContext('2d')
+  const gr = g.createLinearGradient(0, 0, 64, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.5, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)')
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 512)
+  const fade = g.createLinearGradient(0, 0, 0, 512); fade.addColorStop(0, 'rgba(0,0,0,1)'); fade.addColorStop(0.15, 'rgba(0,0,0,0)'); fade.addColorStop(0.85, 'rgba(0,0,0,0)'); fade.addColorStop(1, 'rgba(0,0,0,1)')
+  g.globalCompositeOperation = 'destination-out'; g.fillStyle = fade; g.fillRect(0, 0, 64, 512)
+  return new THREE.CanvasTexture(c) })()
+const streak = new THREE.Mesh(new THREE.PlaneGeometry(7, 230), new THREE.MeshBasicMaterial({ map: streakTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }))
+streak.rotation.x = -Math.PI / 2; streak.rotation.z = (cfg.streakAngle ?? 8) * Math.PI / 180; streak.position.set(cfg.streakX ?? -52, 6.3, -8); ipad.add(streak)
+
+// ---- the phone camera ----
+const camera = new THREE.PerspectiveCamera(cfg.fov ?? 52, W / H, 5, 4000)
+const hash = (n) => { const s = Math.sin(n * 91.7) * 43758.5453; return s - Math.floor(s) }
+const smooth = (t, seed) => { const i = Math.floor(t), f = t - i, u = f * f * (3 - 2 * f); return (hash(i + seed) * (1 - u) + hash(i + 1 + seed) * u) - 0.5 }
+
+const loader = new THREE.TextureLoader()
+let current = null
+window.renderAt = async (t) => {
+  const n = Math.min(cfg.frames - 1, Math.round(t * FPS))
+  const tex = await loader.loadAsync(`${cfg.framesDir}/${String(n + 1).padStart(5, '0')}.jpg`)
+  tex.colorSpace = THREE.SRGBColorSpace
+  screenMat.map = tex; screenMat.needsUpdate = true
+  if (current) current.dispose(); current = tex
+  // handheld: slow wander + a little breathing, never a jump
+  const h = cfg.shake ?? 1
+  const cx = (cfg.camX ?? 6) + smooth(t * 0.6, 1) * 7 * h, cz = (cfg.camZ ?? 120) + smooth(t * 0.5, 7) * 6 * h, cy = (cfg.camY ?? 285) + smooth(t * 0.7, 3) * 5 * h
+  camera.position.set(cx, cy, cz)
+  camera.lookAt((cfg.lookX ?? 0) + smooth(t * 0.8, 11) * 2.5 * h, 0, (cfg.lookZ ?? 4) + smooth(t * 0.8, 17) * 2.5 * h)
+  camera.rotateZ((cfg.roll ?? -2) * Math.PI / 180 + smooth(t * 0.5, 23) * 0.012 * h)
+  renderer.render(scene, camera)
+}
+await window.renderAt(0)
+window.__info = { ok: true }
+window.__ready = true
+</script>
+</body>
+</html>

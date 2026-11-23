@@ -1,0 +1,37 @@
+{
+  "out_dir": "out",
+  "music": "music/your-track.mp3",
+  "music_volume": 0.5,
+  "clip_audio_volume": 0,
+  "videos": [
+    {
+      "id": "heart-lad",
+      "clip": "clips/heart-lad.mp4",
+      "caption": "if you have an A in anatomy\nwhat is this artery called",
+      "y": 0.8,
+      "dur": 10
+    },
+    {
+      "id": "skull-sphenoid",
+      "clip": "clips/skull-sphenoid.mp4",
+      "caption": "this bone is my biggest fear\nbtw",
+      "y": 0.66,
+      "dur": 10
+    },
+    {
+      "id": "forearm-palmaris",
+      "clip": "clips/forearm-palmaris.mp4",
+      "caption": "why is this muscle even needed?\nit's so small after all.",
+      "y": 0.64,
+      "dur": 10
+    },
+    {
+      "id": "forearm-ipad",
+      "clip": "clips/forearm-ipad.mp4",
+      "caption": "if you have an A in anatomy\nwhat is this muscle called",
+      "y": 0.6,
+      "dur": 10,
+      "grain": 7
+    }
+  ]
+}

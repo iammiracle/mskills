@@ -1,0 +1,365 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#c4935f}
+#stage{position:absolute;inset:0;overflow:hidden;
+  background:repeating-linear-gradient(92deg,#c99a66 0 38px,#c08d58 38px 61px,#cfa36f 61px 104px,#bd8a55 104px 130px)}
+.sheet{position:absolute;left:44px;top:48px;width:996px;height:1960px;background:#f4f1ea;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#page{position:absolute;left:34px;top:34px;width:1012px;height:1990px;background:#fff;border-radius:6px;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);overflow:hidden}
+#page .rules{position:absolute;left:0;right:0;top:350px;bottom:0;
+  background:repeating-linear-gradient(180deg,transparent 0 62px,#e3ecf5 62px 65px)}
+#page .shade{position:absolute;left:0;right:0;top:1380px;height:620px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.16))}
+.holes{position:absolute;left:0;top:44px;width:100%;display:flex;justify-content:space-around;padding:0 40px}
+.holes i{width:34px;height:46px;border-radius:17px;background:#c79762;box-shadow:inset 0 3px 4px rgba(0,0,0,.35)}
+.abs{position:absolute}
+#home{left:78px;top:198px;width:104px;height:104px;border:6px solid #1d1d1f;border-radius:50%;background:#fff}
+#lvl{left:0;width:1080px;top:206px;text-align:center;font:600 70px Fredoka;color:#1d1d1f;letter-spacing:1px}
+#tog{left:812px;top:216px;width:186px;height:76px;border:6px solid #1d1d1f;border-radius:40px;background:#fff}
+#knob{position:absolute;left:96px;top:-14px;width:92px;height:92px}
+#sep{left:62px;top:334px;width:956px;height:6px;background:#1d1d1f;border-radius:3px}
+.q{position:absolute;left:0;width:1080px;top:372px;text-align:center}
+.q .plain{font:400 76px 'Patrick Hand';color:#1d1d1f}
+.q .pill{display:inline-block;background:#ffe76e;border:6px solid #1d1d1f;border-radius:22px;padding:10px 40px 14px;font:600 60px Fredoka;color:#1d1d1f}
+.lv{position:absolute;inset:0;opacity:0}
+svg.full{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+.num{font:700 120px Fredoka;fill:#fff;stroke:#1d1d1f;stroke-width:6;paint-order:stroke}
+.zz{font:700 96px Fredoka;fill:#1d1d1f}
+#drag{position:absolute;font:600 60px Fredoka;color:#1d1d1f;opacity:0;white-space:nowrap}
+#dark{position:absolute;inset:0;background:#0b0d1e;opacity:0}
+#hand{position:absolute;left:0;top:0;width:2026px;transform-origin:230px 210px;filter:drop-shadow(-26px 34px 26px rgba(0,0,0,.28));will-change:transform}
+.rip{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:8px solid rgba(40,40,40,.35);opacity:0}
+#end{position:absolute;inset:0;opacity:0;background:#f3eee6}
+#endbg{position:absolute;inset:-40px;background:repeating-linear-gradient(92deg,#c99a66 0 38px,#c08d58 38px 61px,#cfa36f 61px 104px,#bd8a55 104px 130px);filter:blur(18px);opacity:.55}
+#endcard{position:absolute;left:110px;top:300px;width:860px;height:1300px;background:#fff;border-radius:40px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+.try{position:absolute;left:0;width:1080px;text-align:center;font:700 150px/1.02 Fredoka;color:#d8231f;letter-spacing:2px}
+#play{position:absolute;left:290px;top:1290px;width:500px;height:150px;border-radius:30px;background:#e2302a;box-shadow:0 12px 0 #9d1612;
+  color:#fff;font:700 76px/150px Fredoka;text-align:center;letter-spacing:3px}
+</style></head><body>
+<div id="stage">
+  <div class="sheet" style="transform:rotate(-1.4deg)"></div>
+  <div class="sheet" style="transform:rotate(1.1deg)"></div>
+  <div id="page"><div class="rules"></div><div class="shade"></div><div class="holes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+  <!-- header -->
+  <div id="home" class="abs"><svg viewBox="0 0 100 100" width="92" height="92"><path d="M22 50 L50 26 L78 50 M30 44 V76 H70 V44" fill="#9a9a9a" stroke="#1d1d1f" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/><rect x="44" y="58" width="13" height="18" fill="#fff" stroke="#1d1d1f" stroke-width="5"/></svg></div>
+  <div id="lvl" class="abs">LEVEL 27</div>
+  <div id="tog" class="abs"><svg id="knob" viewBox="0 0 100 100"><circle id="kb" cx="50" cy="44" r="30" fill="#ffd93b" stroke="#1d1d1f" stroke-width="6"/><path d="M40 72 H60 M42 82 H58" stroke="#1d1d1f" stroke-width="6" stroke-linecap="round"/><path d="M50 30 v18" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round" opacity=".5"/></svg></div>
+  <div id="sep" class="abs"></div>
+
+  <!-- L1: seesaw, flip the 6 -->
+  <div class="lv" id="L1">
+    <div class="q"><span class="plain">Make both sides equal.</span></div>
+    <svg class="full" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M540 1150 L455 1300 H625 Z" fill="#3e3e42" stroke="#1d1d1f" stroke-width="7"/>
+      <g id="plank">
+        <rect x="140" y="1122" width="800" height="30" rx="8" fill="#8f8f94" stroke="#1d1d1f" stroke-width="7"/>
+        <g><rect x="200" y="952" width="170" height="170" rx="22" fill="#9c9ca1" stroke="#1d1d1f" stroke-width="7"/><text class="num" x="285" y="1080" text-anchor="middle">9</text></g>
+        <g id="b6"><rect x="710" y="952" width="170" height="170" rx="22" fill="#9c9ca1" stroke="#1d1d1f" stroke-width="7"/><text class="num" x="795" y="1080" text-anchor="middle">6</text></g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- L2: wake him up, drag the Zzz away -->
+  <div class="lv" id="L2">
+    <div class="q"><span class="pill">Wake him up!</span></div>
+    <svg class="full" stroke="#1d1d1f" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="110" y="1200" width="660" height="120" rx="14" fill="#a56a3c"/>
+      <path d="M130 1320 v70 M750 1320 v70" stroke-width="16"/>
+      <rect x="96" y="1020" width="44" height="300" rx="16" fill="#8a5530"/>
+      <rect x="140" y="1150" width="620" height="70" rx="20" fill="#f7f4ef"/>
+      <ellipse cx="270" cy="1140" rx="110" ry="46" fill="#fff"/>
+      <g id="head2">
+        <circle cx="300" cy="1080" r="74" fill="#f6c69d"/>
+        <path d="M228 1060 Q240 990 312 1000 Q370 1004 372 1056 Q340 1030 300 1036 Q262 1040 228 1060Z" fill="#5a3a22"/>
+        <g id="eyesC"><path d="M270 1092 q14 12 28 0 M318 1092 q14 12 28 0" fill="none" stroke-width="6"/></g>
+        <g id="eyesO" opacity="0"><circle cx="284" cy="1088" r="15" fill="#fff" stroke-width="5"/><circle cx="332" cy="1088" r="15" fill="#fff" stroke-width="5"/><circle cx="286" cy="1090" r="6" fill="#1d1d1f" stroke="none"/><circle cx="334" cy="1090" r="6" fill="#1d1d1f" stroke="none"/><ellipse cx="310" cy="1124" rx="12" ry="9" fill="#7a2b20" stroke-width="4"/></g>
+      </g>
+      <path d="M360 1130 Q380 1080 470 1080 H740 Q770 1080 770 1120 V1210 H360Z" fill="#6fa8dc"/>
+      <path d="M470 1082 V1208 M590 1082 V1208" stroke="#4f86b8" stroke-width="10"/>
+      <rect x="800" y="1170" width="170" height="150" rx="12" fill="#c58a55"/>
+      <path d="M800 1240 H970" stroke-width="5"/>
+      <path d="M820 1320 v70 M950 1320 v70" stroke-width="14"/>
+      <g id="clock">
+        <circle cx="850" cy="1060" r="22" fill="#e6382f"/><circle cx="920" cy="1060" r="22" fill="#e6382f"/>
+        <circle cx="885" cy="1105" r="62" fill="#e6382f"/><circle cx="885" cy="1105" r="44" fill="#fff" stroke-width="5"/>
+        <path d="M885 1105 V1078 M885 1105 L903 1114" stroke-width="6"/>
+        <path d="M850 1162 l-12 14 M920 1162 l12 14" stroke-width="8"/>
+      </g>
+      <g id="ring" opacity="0" stroke-width="6"><path d="M800 1040 l-26 -18 M790 1080 l-32 -4 M970 1040 l26 -18 M980 1080 l32 -4"/></g>
+      <g id="zz"><text class="zz" x="420" y="980" stroke="none">Z</text><text class="zz" x="500" y="890" stroke="none" style="font-size:78px">z</text><text class="zz" x="560" y="820" stroke="none" style="font-size:62px">Z</text></g>
+      <g id="bang" opacity="0"><path d="M410 930 l-8 -80" stroke-width="14"/><circle cx="414" cy="962" r="8" fill="#1d1d1f"/></g>
+    </svg>
+  </div>
+
+  <!-- L3: make him strong, drag the word onto him -->
+  <div class="lv" id="L3">
+    <div class="q"><span class="pill">Make him <span id="wstrong">strong</span>.</span></div>
+    <svg class="full" stroke="#1d1d1f" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <g id="skinny">
+        <path d="M500 1250 L490 1440 M580 1250 L590 1440" stroke-width="22"/><path d="M500 1250 L490 1440 M580 1250 L590 1440" stroke="#f6c69d" stroke-width="10"/>
+        <path d="M455 1450 h50 M575 1450 h50" stroke-width="22"/>
+        <path d="M470 1150 H610 L620 1260 H460Z" fill="#e8463d"/>
+        <path d="M482 935 Q540 960 598 935 L615 1160 H465Z" fill="#fff"/>
+        <path d="M478 950 Q450 1050 440 1160" stroke-width="24"/><path d="M478 950 Q450 1050 440 1160" stroke="#f6c69d" stroke-width="11"/>
+        <g id="armR"><path d="M602 950 Q630 1050 640 1160" stroke-width="24"/><path d="M602 950 Q630 1050 640 1160" stroke="#f6c69d" stroke-width="11"/>
+          <g id="db"><rect x="604" y="1158" width="76" height="12" rx="5" fill="#555"/><rect x="596" y="1144" width="18" height="40" rx="5" fill="#333"/><rect x="670" y="1144" width="18" height="40" rx="5" fill="#333"/></g></g>
+        <path d="M528 900 v34 M552 900 v34" stroke-width="20"/><path d="M528 900 v34 M552 900 v34" stroke="#f6c69d" stroke-width="7"/>
+        <circle cx="540" cy="830" r="78" fill="#f6c69d"/>
+        <path d="M466 812 l14 -50 l20 28 l16 -42 l18 34 l18 -38 l16 36 l20 -26 l12 52 Q540 770 466 812Z" fill="#2a2a2e"/>
+        <circle cx="514" cy="836" r="7" fill="#1d1d1f" stroke="none"/><circle cx="566" cy="836" r="7" fill="#1d1d1f" stroke="none"/>
+        <path d="M518 878 q22 -14 44 0" fill="none" stroke-width="6"/>
+        <path d="M500 810 l24 8 M580 810 l-24 8" stroke-width="5"/>
+      </g>
+      <g id="buff" opacity="0">
+        <path d="M490 1250 L470 1440 M590 1250 L610 1440" stroke-width="34"/><path d="M490 1250 L470 1440 M590 1250 L610 1440" stroke="#f0b98c" stroke-width="20"/>
+        <path d="M430 1450 h66 M584 1450 h66" stroke-width="24"/>
+        <path d="M455 1150 H625 L640 1265 H440Z" fill="#e8463d"/>
+        <path d="M400 940 Q540 900 680 940 Q700 1060 630 1160 H450 Q380 1060 400 940Z" fill="#f0b98c"/>
+        <path d="M470 1010 Q510 1040 540 1010 Q570 1040 610 1010 M540 1010 V1140 M500 1080 h80 M505 1120 h70" fill="none" stroke-width="5"/>
+        <path d="M410 950 Q330 960 300 900 Q280 840 320 790" stroke-width="64" fill="none"/><path d="M410 950 Q330 960 300 900 Q280 840 320 790" stroke="#f0b98c" stroke-width="50" fill="none"/>
+        <path d="M355 935 Q330 880 360 850" stroke-width="5" fill="none"/>
+        <circle cx="326" cy="770" r="40" fill="#f0b98c"/>
+        <path d="M670 950 Q750 960 780 900 Q800 840 760 790" stroke-width="64" fill="none"/><path d="M670 950 Q750 960 780 900 Q800 840 760 790" stroke="#f0b98c" stroke-width="50" fill="none"/>
+        <path d="M725 935 Q750 880 720 850" stroke-width="5" fill="none"/>
+        <circle cx="754" cy="770" r="40" fill="#f0b98c"/>
+        <path d="M520 890 v40 M560 890 v40" stroke-width="30"/><path d="M520 890 v40 M560 890 v40" stroke="#f0b98c" stroke-width="16"/>
+        <circle cx="540" cy="830" r="78" fill="#f0b98c"/>
+        <path d="M466 812 l14 -50 l20 28 l16 -42 l18 34 l18 -38 l16 36 l20 -26 l12 52 Q540 770 466 812Z" fill="#2a2a2e"/>
+        <path d="M506 834 q8 -8 16 0 M558 834 q8 -8 16 0" fill="none" stroke-width="6"/>
+        <path d="M506 866 q34 34 68 0Z" fill="#fff" stroke-width="5"/>
+        <path d="M500 806 l24 6 M580 806 l-24 6" stroke-width="5"/>
+        <g stroke-width="6"><path d="M250 760 l-30 -14 M244 800 l-34 2 M830 760 l30 -14 M836 800 l34 2"/></g>
+      </g>
+    </svg>
+    <div id="drag">strong</div>
+  </div>
+
+  <!-- L4: fill the glass, drag the cloud over it -->
+  <div class="lv" id="L4">
+    <div class="q"><span class="plain">Fill the glass.</span></div>
+    <svg class="full" stroke="#1d1d1f" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <defs><clipPath id="gclip"><path d="M446 1110 L634 1110 L616 1400 L464 1400Z"/></clipPath></defs>
+      <rect x="160" y="1404" width="760" height="40" rx="10" fill="#b07a48"/>
+      <path d="M220 1444 v140 M860 1444 v140" stroke-width="18"/>
+      <g id="glass">
+        <g clip-path="url(#gclip)"><rect id="water" x="430" y="1400" width="220" height="300" fill="#4fb0f5" stroke="none" opacity=".85"/></g>
+        <path d="M446 1110 L634 1110 L616 1400 L464 1400Z" fill="rgba(210,235,255,.25)"/>
+        <path d="M470 1150 L482 1360" stroke="#fff" stroke-width="10" opacity=".9"/>
+      </g>
+      <g id="cloud">
+        <g id="rain" stroke="#4fb0f5" stroke-width="9" opacity="0">
+          <path class="dr" d="M-70 40 v34"/><path class="dr" d="M-30 40 v34"/><path class="dr" d="M10 40 v34"/><path class="dr" d="M50 40 v34"/><path class="dr" d="M-50 40 v34"/><path class="dr" d="M30 40 v34"/>
+        </g>
+        <path d="M-120 40 Q-150 40 -150 10 Q-150 -26 -110 -26 Q-104 -76 -50 -76 Q-14 -110 34 -82 Q90 -96 104 -40 Q150 -36 150 4 Q150 40 112 40Z" fill="#fff" stroke="#9aa3ad"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- L5: turn off the light, use the hint switch -->
+  <div class="lv" id="L5">
+    <div class="q"><span class="pill">Turn off the light!</span></div>
+    <svg class="full" stroke="#1d1d1f" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <g id="lamp">
+        <path d="M540 470 V760" stroke-width="8"/>
+        <rect x="506" y="760" width="68" height="70" rx="8" fill="#6d6d72"/>
+        <path d="M506 785 h68 M506 808 h68" stroke-width="5"/>
+        <g id="rays"><path d="M540 960 m-170 0 h-60 M540 960 m170 0 h60 M540 960 m-125 -125 l-42 -42 M540 960 m125 -125 l42 -42 M540 960 m-125 125 l-42 42 M540 960 m125 125 l42 42 M540 960 m0 175 v60" stroke="#f2b705" stroke-width="12"/></g>
+        <path id="bulb" d="M500 830 h80 Q660 880 650 960 Q640 1060 540 1070 Q440 1060 430 960 Q420 880 500 830Z" fill="#ffe14d"/>
+        <path d="M520 900 q-40 20 -36 70" fill="none" stroke="#fff" stroke-width="12" opacity=".8"/>
+      </g>
+    </svg>
+  </div>
+
+  <div id="dark"></div>
+
+  <!-- marks -->
+  <svg id="xmark" class="abs" width="220" height="220" viewBox="0 0 100 100" style="opacity:0"><path d="M18 18 L82 82 M82 18 L18 82" stroke="#e2302a" stroke-width="18" stroke-linecap="round"/></svg>
+  <svg id="check" class="abs" width="300" height="300" viewBox="0 0 100 100" style="opacity:0"><path d="M10 52 L38 80 L92 22" fill="none" stroke="#1d1d1f" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 52 L38 80 L92 22" fill="none" stroke="#45c93a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+  <!-- end card -->
+  <div id="end">
+    <div id="endbg"></div>
+    <div id="endcard"></div>
+    <svg id="icon" class="abs" style="left:370px;top:390px" width="340" height="340" viewBox="0 0 340 340" stroke="#1d1d1f" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
+      <defs><linearGradient id="ig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c"/><stop offset="1" stop-color="#f25c19"/></linearGradient></defs>
+      <rect x="10" y="10" width="320" height="320" rx="74" fill="url(#ig)" stroke="none"/>
+      <path d="M95 210 Q60 205 62 168 Q50 130 84 112 Q88 76 128 74 Q150 50 182 66 Q220 52 238 86 Q280 92 276 134 Q296 168 266 196 Q262 236 222 236 Q200 262 168 246 Q130 262 112 236 Q90 236 95 210Z" fill="#ffb3c7"/>
+      <path d="M170 70 Q160 120 172 160 Q182 200 168 244 M110 130 q30 -10 40 18 M220 120 q-26 4 -30 30 M120 200 q24 -22 46 -4 M206 196 q22 4 30 -20" fill="none" stroke-width="7"/>
+      <circle cx="132" cy="166" r="26" fill="#fff"/><circle cx="206" cy="166" r="26" fill="#fff"/><path d="M158 166 h22" />
+      <circle cx="136" cy="168" r="9" fill="#1d1d1f" stroke="none"/><circle cx="210" cy="168" r="9" fill="#1d1d1f" stroke="none"/>
+    </svg>
+    <div class="try" style="top:830px">TRY IT<br>YOURSELF</div>
+    <div id="play">PLAY NOW</div>
+  </div>
+
+  <div class="rip" id="rip"></div>
+  <img id="hand" src="a/hand.png">
+</div>
+<script>
+const $ = (s) => document.querySelector(s)
+const tl = gsap.timeline({ paused: true })
+const H = { x: 1400, y: 2300, s: 1, r: 0 }
+const hand = $('#hand')
+const applyHand = () => {
+  hand.style.transform = `translate(${H.x - 230}px,${H.y - 210}px) rotate(${H.r}deg) scale(${H.s})`
+  const t = tl.time(); let n = 27
+  for (const [at, v] of LV) if (t >= at) n = v
+  lvlEl.textContent = 'LEVEL ' + n
+}
+const CUES = [], LV = []
+const lvlEl = document.getElementById('lvl')
+const sfx = (t, f, v = 1) => CUES.push({ t: +t.toFixed(3), f, v })
+
+const move = (t, x, y, d = 0.45, ease = 'power2.inOut') => tl.to(H, { x, y, duration: d, ease }, t)
+const tap = (t, x, y, sound = 'tick') => {
+  tl.to(H, { s: 0.93, duration: 0.09, ease: 'power1.out' }, t).to(H, { s: 1, duration: 0.14, ease: 'power1.in' }, t + 0.09)
+  tl.set('#rip', { left: x, top: y, scale: 0.3, opacity: 1 }, t + 0.05).to('#rip', { scale: 1.3, opacity: 0, duration: 0.4, ease: 'power2.out' }, t + 0.05)
+  sfx(t + 0.06, sound, 0.9)
+}
+const press = (t) => tl.to(H, { s: 0.93, duration: 0.1 }, t)
+const release = (t) => tl.to(H, { s: 1, duration: 0.12 }, t)
+const wrong = (t, x, y) => {
+  tl.set('#xmark', { left: x - 110, top: y - 110, scale: 0.2, opacity: 1, rotation: -10 }, t)
+    .to('#xmark', { scale: 1, rotation: 0, duration: 0.25, ease: 'back.out(3)' }, t)
+    .to('#xmark', { opacity: 0, duration: 0.2 }, t + 0.6)
+  sfx(t, 'wrong', 0.8)
+}
+const right = (t, x, y) => {
+  tl.set('#check', { left: x - 150, top: y - 150, scale: 0.2, opacity: 1 }, t)
+    .to('#check', { scale: 1, duration: 0.35, ease: 'back.out(2.6)' }, t)
+    .to('#check', { opacity: 0, duration: 0.2 }, t + 0.95)
+  sfx(t, 'success', 0.75)
+}
+const level = (t, id, n, prev) => {
+  if (prev) tl.set(prev, { opacity: 0 }, t)
+  tl.set(id, { opacity: 1 }, t).set('#check,#xmark', { opacity: 0 }, t); LV.push([t, n])
+  if (prev) sfx(t, 'softpop', 0.6)
+}
+
+function build() {
+  applyHand()
+  // ---------- L1 (0 - 6.2) Make both sides equal: the 6 turned upside down is a 9
+  gsap.set('#plank', { svgOrigin: '540 1150', rotation: -9 })
+  gsap.set('#b6', { svgOrigin: '795 1037' })
+  level(0, '#L1', 27)
+  move(0.35, 905, 1062, 0.6, 'power3.out')
+  press(1.05); tl.to('#plank', { rotation: 4, duration: 0.25, ease: 'power2.out' }, 1.05); sfx(1.08, 'plop', 0.7)
+  release(1.5); tl.to('#plank', { rotation: -9, duration: 0.45, ease: 'bounce.out' }, 1.5)
+  wrong(1.75, 905, 1000)
+  move(2.45, 800, 1000, 0.45)
+  press(3.0)
+  tl.to('#b6', { rotation: 180, duration: 0.7, ease: 'power2.inOut' }, 3.1); sfx(3.1, 'spin', 0.35)
+  tl.to(H, { r: 16, x: 812, duration: 0.7, ease: 'power2.inOut' }, 3.1)
+  release(3.85); tl.to(H, { r: 0, duration: 0.3 }, 3.85)
+  tl.to('#plank', { rotation: 0, duration: 0.6, ease: 'elastic.out(1,0.5)' }, 3.95); sfx(4.0, 'plop', 0.6)
+  move(4.15, 960, 1500, 0.5)
+  right(4.45, 540, 760)
+
+  // ---------- L2 (6.2 - 12.0) Wake him up: drag the Zzz away
+  level(6.2, '#L2', 28, '#L1')
+  tl.to('#zz', { y: -18, duration: 0.7, yoyo: true, repeat: 5, ease: 'sine.inOut' }, 6.2)
+  sfx(6.3, 'snore', 0.55); sfx(7.9, 'snore', 0.55)
+  move(6.5, 885, 1105, 0.5)
+  tap(7.05, 885, 1105)
+  tl.to('#ring', { opacity: 1, duration: 0.05 }, 7.1).to('#clock', { rotation: 8, svgOrigin: '885 1105', duration: 0.05, yoyo: true, repeat: 9 }, 7.1).to('#ring', { opacity: 0, duration: 0.1 }, 7.6)
+  sfx(7.1, 'tick', 0.8); sfx(7.2, 'tick', 0.8); sfx(7.3, 'tick', 0.8); sfx(7.4, 'tick', 0.8)
+  wrong(7.75, 885, 1000)
+  move(8.35, 450, 950, 0.5)
+  press(8.9)
+  tl.to('#zz', { x: 640, y: -260, duration: 0.75, ease: 'power2.in' }, 9.0)
+  move(9.0, 1090, 690, 0.75, 'power2.in')
+  tl.to('#zz', { opacity: 0, duration: 0.15 }, 9.6)
+  release(9.7); sfx(9.0, 'flip', 0.6)
+  tl.set('#eyesC', { opacity: 0 }, 9.85).set('#eyesO', { opacity: 1 }, 9.85)
+  tl.to('#head2', { y: -40, rotation: 8, svgOrigin: '300 1150', duration: 0.25, ease: 'back.out(3)' }, 9.85)
+  tl.to('#bang', { opacity: 1, duration: 0.05 }, 9.9).from('#bang', { scale: 0.2, svgOrigin: '410 960', duration: 0.3, ease: 'back.out(3)' }, 9.9)
+  sfx(9.88, 'pop2', 0.8)
+  move(9.9, 1000, 1550, 0.6)
+  right(10.25, 540, 700)
+
+  // ---------- L3 (12.0 - 18.2) Make him strong: drag the word "strong" onto him
+  level(12.0, '#L3', 29, '#L2')
+  move(12.3, 645, 1168, 0.5)
+  tap(12.85, 645, 1168)
+  tl.to('#armR', { y: -14, duration: 0.06, yoyo: true, repeat: 7, ease: 'none' }, 12.95)
+  wrong(13.55, 650, 1060)
+  const w = $('#wstrong').getBoundingClientRect()
+  gsap.set('#drag', { left: w.left, top: w.top - 6 })
+  const wx = w.left + w.width / 2, wy = w.top + w.height / 2
+  move(14.0, wx, wy + 10, 0.55)
+  press(14.6)
+  tl.set('#drag', { opacity: 1 }, 14.65).set('#wstrong', { opacity: 0 }, 14.65).to('#drag', { scale: 1.15, duration: 0.15 }, 14.65)
+  sfx(14.65, 'plop', 0.7)
+  tl.to('#drag', { x: 540 - wx, y: 1040 - wy, duration: 0.8, ease: 'power2.inOut' }, 14.85)
+  move(14.85, 540, 1050, 0.8)
+  release(15.7)
+  tl.to('#drag', { scale: 0.2, opacity: 0, duration: 0.18, ease: 'power2.in' }, 15.75)
+  tl.set('#skinny', { opacity: 0 }, 15.9).set('#buff', { opacity: 1 }, 15.9)
+    .from('#buff', { scale: 0.7, svgOrigin: '540 1450', duration: 0.45, ease: 'back.out(2.4)' }, 15.9)
+  sfx(15.9, 'pop2', 0.9); sfx(15.95, 'lvup1', 0.5)
+  move(15.85, 980, 1600, 0.55)
+  right(16.45, 540, 640)
+
+  // ---------- L4 (18.2 - 23.6) Fill the glass: drag the cloud over it
+  level(18.2, '#L4', 30, '#L3')
+  gsap.set('#cloud', { x: 290, y: 680 })
+  tl.to('#cloud', { y: 664, duration: 0.8, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 18.2)
+  move(18.45, 545, 1260, 0.5)
+  tap(19.0, 545, 1260)
+  tl.to('#glass', { rotation: 6, svgOrigin: '540 1400', duration: 0.07, yoyo: true, repeat: 5 }, 19.1)
+  sfx(19.1, 'tick', 0.8); sfx(19.25, 'tick', 0.7)
+  wrong(19.6, 545, 1180)
+  move(20.15, 300, 690, 0.5)
+  press(20.7)
+  tl.to('#cloud', { x: 540, y: 900, duration: 0.85, ease: 'power2.inOut' }, 20.8)
+  move(20.8, 550, 910, 0.85)
+  release(21.7)
+  move(21.85, 980, 1600, 0.55)
+  tl.set('#rain', { opacity: 1 }, 21.75)
+  tl.fromTo('.dr', { y: 0, opacity: 1 }, { y: 190, opacity: 0.2, duration: 0.32, ease: 'none', repeat: 5, stagger: { each: 0.06 } }, 21.75)
+  sfx(21.75, 'rain', 0.9)
+  tl.to('#water', { attr: { y: 1150 }, duration: 1.6, ease: 'power1.inOut' }, 21.95)
+  tl.to('#rain', { opacity: 0, duration: 0.2 }, 23.6)
+  right(22.95, 760, 1150)
+
+  // ---------- L5 (23.6 - 27.6) Turn off the light: tap the hint switch in the top bar
+  level(23.6, '#L5', 31, '#L4')
+  tl.to('#rays', { opacity: 0.6, duration: 0.25, yoyo: true, repeat: 3 }, 23.6)
+  move(23.85, 560, 990, 0.5)
+  tap(24.4, 560, 990)
+  tl.to('#lamp', { rotation: 7, svgOrigin: '540 470', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 24.5)
+  wrong(24.95, 560, 900)
+  move(25.4, 905, 262, 0.6)
+  tap(26.05, 905, 262, 'toggle')
+  tl.to('#knob', { left: -6, duration: 0.18, ease: 'power2.out' }, 26.1).set('#kb', { attr: { fill: '#cfcfcf' } }, 26.1)
+  tl.set('#bulb', { attr: { fill: '#d9d9d9' } }, 26.12).set('#rays', { opacity: 0 }, 26.12)
+  tl.to('#dark', { opacity: 0.62, duration: 0.12 }, 26.12)
+  move(26.3, 1000, 1600, 0.5)
+  right(26.55, 540, 1200)
+
+  // ---------- End card (27.7 - 30.6)
+  tl.to('#stage > *:not(#end):not(#hand):not(#rip)', { y: -1950, rotation: -4, duration: 0.45, ease: 'power2.in' }, 27.6)
+  sfx(27.6, 'flip', 0.8)
+  tl.to('#end', { opacity: 1, duration: 0.25 }, 27.85)
+  tl.from('#icon', { scale: 0.3, opacity: 0, duration: 0.45, ease: 'back.out(2.4)' }, 27.95)
+  tl.from('.try', { y: 60, opacity: 0, duration: 0.4, ease: 'power3.out' }, 28.1)
+  tl.from('#play', { scale: 0.4, opacity: 0, duration: 0.4, ease: 'back.out(2.6)' }, 28.3)
+  sfx(28.0, 'pop2', 0.8); sfx(28.32, 'softpop', 0.7)
+  tl.to('#play', { scale: 1.06, duration: 0.35, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 28.75)
+  move(28.9, 600, 1380, 0.55, 'power3.out')
+  tap(29.55, 600, 1380)
+  tl.to({}, { duration: 0.01 }, 30.6)
+  tl.eventCallback('onUpdate', applyHand)
+  window.DUR = 30.6
+  window.CUES = CUES
+}
+window.seek = (t) => { tl.seek(t, false); applyHand() }
+window.READY = document.fonts.ready.then(() => new Promise((r) => {
+  const img = $('#hand'); img.complete ? r() : (img.onload = r)
+})).then(build)
+</script>
+</body></html>
