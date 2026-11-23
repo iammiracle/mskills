@@ -321,6 +321,19 @@
     "updated": "2026-11-23",
     "summary": "Move React and shadcn projects from Radix UI to Base UI."
   },
+  "nextjs-on-cloudflare": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/nextjs-on-cloudflare",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:f86da2a3cb3b64acb0ac4879310ef36005a013db4db1b474e21d6fe97121e3d2",
+    "updated": "2026-11-23",
+    "summary": "Build, move and deploy Next.js apps on Cloudflare Workers with vinext or OpenNext."
+  },
   "pr": {
     "status": "tracked",
     "source": {
@@ -562,6 +575,19 @@
     "hash": "sha256:7f9809cf4ae0964b941ffe7c5d93e2d968579bbce1f7ccb00534119e27126b2d",
     "updated": "2026-11-23",
     "summary": "Write and review Workers code against production best practices."
+  },
+  "workers-development": {
+    "status": "tracked",
+    "source": {
+      "type": "github",
+      "repo": "cloudflare/skills",
+      "path": "skills/workers-development",
+      "ref": "HEAD"
+    },
+    "version": "5108325ecceabc899c761e07aa617b09c02445ee",
+    "hash": "sha256:65443c075213c82fb2e50f43e3329ddbc074ad9d64b2342642490bbcc881c372",
+    "updated": "2026-11-23",
+    "summary": "Run and debug Workers locally: dev servers, binding data, traces and logs."
   },
   "wrangler": {
     "status": "tracked",

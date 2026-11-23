@@ -2,7 +2,7 @@
 
 <!-- Written by ./mskills from sources.json. Edit summaries there, then run ./mskills readme. -->
 
-8 skills.
+10 skills.
 
 ## agents-sdk
 
@@ -36,6 +36,14 @@ Build stateful features such as chat rooms, bookings and games with Durable Obje
 - Last approved: 2026-11-23
 - Instructions: [durable-objects/SKILL.md](durable-objects/SKILL.md)
 
+## nextjs-on-cloudflare
+
+Build, move and deploy Next.js apps on Cloudflare Workers with vinext or OpenNext.
+
+- Kind: tracked, from [cloudflare/skills/skills/nextjs-on-cloudflare](https://github.com/cloudflare/skills/tree/HEAD/skills/nextjs-on-cloudflare)
+- Last approved: 2026-11-23
+- Instructions: [nextjs-on-cloudflare/SKILL.md](nextjs-on-cloudflare/SKILL.md)
+
 ## sandbox-sdk
 
 Run untrusted code in Cloudflare sandboxes. Cloudflare has replaced it upstream with sandbox-stable and sandbox-next.
@@ -60,6 +68,14 @@ Write and review Workers code against production best practices.
 - Kind: tracked, from [cloudflare/skills/skills/workers-best-practices](https://github.com/cloudflare/skills/tree/HEAD/skills/workers-best-practices)
 - Last approved: 2026-11-23
 - Instructions: [workers-best-practices/SKILL.md](workers-best-practices/SKILL.md)
+
+## workers-development
+
+Run and debug Workers locally: dev servers, binding data, traces and logs.
+
+- Kind: tracked, from [cloudflare/skills/skills/workers-development](https://github.com/cloudflare/skills/tree/HEAD/skills/workers-development)
+- Last approved: 2026-11-23
+- Instructions: [workers-development/SKILL.md](workers-development/SKILL.md)
 
 ## wrangler
 
